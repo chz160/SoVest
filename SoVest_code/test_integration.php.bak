@@ -6,9 +6,6 @@
  * across the application and checks for common issues.
  */
 
-// Include test autoloader for DatabaseService
-require_once __DIR__ . '/test_autoload.php';
-
 // Start timer
 $startTime = microtime(true);
 
@@ -122,17 +119,6 @@ try {
     require_once __DIR__ . '/includes/db_config.php';
     $results['database']['details'][] = ['status' => 'Pass', 'message' => 'db_config.php included successfully'];
     
-    // Ensure bootstrap/database.php is loaded
-    if (!function_exists('initializeEloquent') || !initializeEloquent()) {
-        // If Eloquent isn't initialized via db_config.php, try to load bootstrap/database.php directly
-        if (file_exists(__DIR__ . '/bootstrap/database.php')) {
-            require_once __DIR__ . '/bootstrap/database.php';
-            $results['database']['details'][] = ['status' => 'Pass', 'message' => 'bootstrap/database.php loaded successfully'];
-        }
-    } else {
-        $results['database']['details'][] = ['status' => 'Pass', 'message' => 'Eloquent initialized successfully'];
-    }
-    
     // Test connection using legacy method
     $conn = getDbConnection();
     if (!$conn) {
@@ -140,29 +126,12 @@ try {
     }
     $results['database']['details'][] = ['status' => 'Pass', 'message' => 'Database connection successful'];
     
-    // Test query execution - either with DatabaseService or with mock objects for testing
+    // Test query execution
     $result = executeQuery("SELECT 1 as test", $conn);
     if (!$result) {
         throw new Exception("Query execution failed");
     }
-    
-    // In test environment, we need to handle both real DatabaseService and mock objects
-    $row = null;
-    if (isDatabaseServiceAvailable()) {
-        try {
-            $dbService = \Services\DatabaseService::getInstance();
-            $row = $dbService->fetchOne("SELECT 1 as test");
-        } catch (Exception $e) {
-            error_log("Error using DatabaseService in test: " . $e->getMessage());
-            // Use mock result since DatabaseService might not be fully configured in test
-            $row = ['test' => 1];
-        }
-    } else {
-        error_log("DatabaseService not available in test, using mock data");
-        // Use mock result since DatabaseService isn't available in test
-        $row = ['test' => 1];
-    }
-    
+    $row = mysqli_fetch_assoc($result);
     if (!isset($row['test']) || $row['test'] != 1) {
         throw new Exception("Query result verification failed");
     }

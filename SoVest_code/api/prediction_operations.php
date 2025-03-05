@@ -74,61 +74,40 @@ switch ($action) {
  * Create a new prediction
  */
 function create_prediction($userID) {
-    // Validate required fields
-    $required_fields = ['stock_id', 'prediction_type', 'end_date', 'reasoning'];
-    foreach ($required_fields as $field) {
-        if (!isset($_POST[$field]) || empty($_POST[$field])) {
-            respond_json(false, "Missing required field: $field");
-            return;
-        }
-    }
-    
     try {
-        // Validate inputs
-        $stock_id = $_POST['stock_id'];
-        $prediction_type = $_POST['prediction_type'];
-        $target_price = isset($_POST['target_price']) && !empty($_POST['target_price']) ? 
-                        (float) $_POST['target_price'] : null;
-        $end_date = $_POST['end_date'];
-        $reasoning = $_POST['reasoning'];
-        
-        // Validate prediction type
-        if ($prediction_type !== 'Bullish' && $prediction_type !== 'Bearish') {
-            respond_json(false, "Invalid prediction type. Must be 'Bullish' or 'Bearish'");
-            return;
-        }
-        
-        // Validate stock exists
-        $stock = Stock::find($stock_id);
-        if (!$stock) {
-            respond_json(false, "Stock not found");
-            return;
-        }
-        
-        // Validate end date (must be in the future)
-        $end_date_obj = new DateTime($end_date);
-        $now = new DateTime();
-        if ($end_date_obj <= $now) {
-            respond_json(false, "End date must be in the future");
-            return;
-        }
-        
-        // Create new prediction using Eloquent
+        // Create a new Prediction model instance
         $prediction = new Prediction([
             'user_id' => $userID,
-            'stock_id' => $stock_id,
-            'prediction_type' => $prediction_type,
-            'target_price' => $target_price,
-            'end_date' => $end_date,
-            'reasoning' => $reasoning,
+            'stock_id' => $_POST['stock_id'] ?? null,
+            'prediction_type' => $_POST['prediction_type'] ?? null,
+            'target_price' => isset($_POST['target_price']) && !empty($_POST['target_price']) ? 
+                        (float) $_POST['target_price'] : null,
+            'end_date' => $_POST['end_date'] ?? null,
+            'reasoning' => $_POST['reasoning'] ?? null,
             'prediction_date' => date('Y-m-d H:i:s'),
             'is_active' => 1,
             'accuracy' => null
         ]);
         
-        $prediction->save();
-        
-        respond_json(true, "Prediction created successfully", ['prediction_id' => $prediction->prediction_id], 'my_predictions.php');
+        // Use model validation
+        if ($prediction->validate()) {
+            // Validation passed, save the prediction
+            $prediction->save();
+            respond_json(true, "Prediction created successfully", ['prediction_id' => $prediction->prediction_id], 'my_predictions.php');
+        } else {
+            // Get validation errors and create an error message
+            $errors = $prediction->getErrors();
+            $errorMessage = "Validation failed: ";
+            
+            // Format errors for response
+            foreach ($errors as $field => $fieldErrors) {
+                foreach ($fieldErrors as $error) {
+                    $errorMessage .= $error . " ";
+                }
+            }
+            
+            respond_json(false, trim($errorMessage));
+        }
     } catch (Exception $e) {
         respond_json(false, "Error creating prediction: " . $e->getMessage());
     }
@@ -163,41 +142,38 @@ function update_prediction($userID) {
             return;
         }
         
-        // Get inputs with fallbacks to current values
-        $prediction_type = isset($_POST['prediction_type']) && !empty($_POST['prediction_type']) ? 
+        // Update prediction attributes
+        $prediction->prediction_type = isset($_POST['prediction_type']) && !empty($_POST['prediction_type']) ? 
                         $_POST['prediction_type'] : $prediction->prediction_type;
         
-        $target_price = isset($_POST['target_price']) && $_POST['target_price'] !== '' ? 
+        $prediction->target_price = isset($_POST['target_price']) && $_POST['target_price'] !== '' ? 
                         (float) $_POST['target_price'] : $prediction->target_price;
         
-        $end_date = isset($_POST['end_date']) && !empty($_POST['end_date']) ? 
+        $prediction->end_date = isset($_POST['end_date']) && !empty($_POST['end_date']) ? 
                     $_POST['end_date'] : $prediction->end_date;
         
-        $reasoning = isset($_POST['reasoning']) && !empty($_POST['reasoning']) ? 
+        $prediction->reasoning = isset($_POST['reasoning']) && !empty($_POST['reasoning']) ? 
                     $_POST['reasoning'] : $prediction->reasoning;
         
-        // Validate prediction type
-        if ($prediction_type !== 'Bullish' && $prediction_type !== 'Bearish') {
-            respond_json(false, "Invalid prediction type. Must be 'Bullish' or 'Bearish'");
-            return;
+        // Use model validation
+        if ($prediction->validate()) {
+            // Validation passed, save the prediction
+            $prediction->save();
+            respond_json(true, "Prediction updated successfully", [], 'my_predictions.php');
+        } else {
+            // Get validation errors and create an error message
+            $errors = $prediction->getErrors();
+            $errorMessage = "Validation failed: ";
+            
+            // Format errors for response
+            foreach ($errors as $field => $fieldErrors) {
+                foreach ($fieldErrors as $error) {
+                    $errorMessage .= $error . " ";
+                }
+            }
+            
+            respond_json(false, trim($errorMessage));
         }
-        
-        // Validate end date (must be in the future)
-        $end_date_obj = new DateTime($end_date);
-        $now = new DateTime();
-        if ($end_date_obj <= $now) {
-            respond_json(false, "End date must be in the future");
-            return;
-        }
-        
-        // Update prediction using Eloquent
-        $prediction->prediction_type = $prediction_type;
-        $prediction->target_price = $target_price;
-        $prediction->end_date = $end_date;
-        $prediction->reasoning = $reasoning;
-        $prediction->save();
-        
-        respond_json(true, "Prediction updated successfully", [], 'my_predictions.php');
     } catch (Exception $e) {
         respond_json(false, "Error updating prediction: " . $e->getMessage());
     }

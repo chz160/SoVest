@@ -36,7 +36,6 @@ try {
     $trending_predictions = Prediction::select([
             'predictions.prediction_id',
             'users.id as user_id',
-            DB::raw("CONCAT(users.first_name, ' ', users.last_name) as username"),
             'users.reputation_score',
             'stocks.symbol',
             'predictions.prediction_type as prediction',
@@ -47,19 +46,12 @@ try {
         ])
         ->join('users', 'predictions.user_id', '=', 'users.id')
         ->join('stocks', 'predictions.stock_id', '=', 'stocks.stock_id')
-        ->leftJoin('prediction_votes', 'predictions.prediction_id', '=', 'prediction_votes.prediction_id')
-        ->select([
-            'predictions.prediction_id',
-            'users.id as user_id',
-            DB::raw("CONCAT(users.first_name, ' ', users.last_name) as username"),
-            'users.reputation_score',
-            'stocks.symbol',
-            'predictions.prediction_type as prediction',
-            'predictions.accuracy',
-            'predictions.target_price',
-            'predictions.end_date',
-            'predictions.is_active',
-            DB::raw('(SELECT COUNT(*) FROM prediction_votes WHERE prediction_id = predictions.prediction_id AND vote_type = "upvote") as votes')
+        ->withCount(['votes as votes' => function($query) {
+            $query->where('vote_type', 'upvote');
+        }])
+        ->addSelect([
+            'users.first_name', 
+            'users.last_name'
         ])
         ->where(function($query) {
             $query->where('predictions.is_active', 1)
@@ -72,8 +64,14 @@ try {
         ->orderBy('predictions.accuracy', 'desc')
         ->orderBy('predictions.prediction_date', 'desc')
         ->limit(15)
-        ->get()
-        ->toArray();
+        ->get();
+    
+    // Map the results to include the full name as username
+    $trending_predictions = $trending_predictions->map(function($prediction) {
+        $prediction = $prediction->toArray();
+        $prediction['username'] = $prediction['first_name'] . ' ' . $prediction['last_name'];
+        return $prediction;
+    })->toArray();
 
     // If no predictions found, use dummy data
     if (empty($trending_predictions)) {

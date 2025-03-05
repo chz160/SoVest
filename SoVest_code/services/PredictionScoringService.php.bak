@@ -6,27 +6,15 @@
  * and calculates user reputation scores based on prediction accuracy.
  */
 
-// Load autoloader first to make sure all classes are available
-if (file_exists(dirname(dirname(__DIR__)) . '/vendor/autoload.php')) {
-    require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
-}
-
 // Include the StockDataService for accessing price data
 require_once __DIR__ . '/StockDataService.php';
 require_once __DIR__ . '/../bootstrap/database.php';
-
-// Force load model files directly
-require_once __DIR__ . '/../database/models/User.php';
-require_once __DIR__ . '/../database/models/Stock.php';
-require_once __DIR__ . '/../database/models/Prediction.php';
-require_once __DIR__ . '/../database/models/StockPrice.php';
 
 use Database\Models\User;
 use Database\Models\Prediction;
 use Database\Models\Stock;
 use Database\Models\StockPrice;
 use Illuminate\Database\Capsule\Manager as DB;
-use Carbon\Carbon;
 
 class PredictionScoringService {
     private $stockService;
@@ -54,7 +42,7 @@ class PredictionScoringService {
         try {
             // Get all active predictions that have reached their end date
             $predictions = Prediction::where('is_active', 1)
-                ->where('end_date', '<=', Carbon::now())
+                ->where('end_date', '<=', DB::raw('NOW()'))
                 ->whereNull('accuracy')
                 ->with(['stock']) // Eager load the stock relationship
                 ->get();
@@ -272,38 +260,23 @@ class PredictionScoringService {
      */
     public function getTopUsers($limit = 10) {
         try {
-            // Get all users ordered by reputation score
-            $users = User::select([
-                'id',
-                'first_name',
-                'last_name',
-                'email',
-                'reputation_score'
-            ])
-            ->orderBy('reputation_score', 'desc')
-            ->limit($limit)
-            ->get();
+            // Using query builder for more complex query
+            $users = DB::table('users')
+                ->select([
+                    'users.id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.reputation_score',
+                    DB::raw('(SELECT COUNT(*) FROM predictions WHERE user_id = users.id) as prediction_count'),
+                    DB::raw('(SELECT AVG(accuracy) FROM predictions WHERE user_id = users.id AND accuracy IS NOT NULL) as avg_accuracy')
+                ])
+                ->orderBy('reputation_score', 'desc')
+                ->limit($limit)
+                ->get()
+                ->toArray();
             
-            // For each user, fetch prediction count and average accuracy
-            $result = $users->map(function($user) {
-                // Count predictions for this user
-                $predictionsCount = Prediction::where('user_id', $user->id)->count();
-                
-                // Calculate average accuracy
-                $avgAccuracy = Prediction::where('user_id', $user->id)
-                    ->whereNotNull('accuracy')
-                    ->avg('accuracy');
-                
-                // Convert to array and add computed values
-                $userData = $user->toArray();
-                $userData['predictions_count'] = $predictionsCount ?? 0;
-                $userData['avg_accuracy'] = $avgAccuracy ?? 0;
-                
-                return $userData;
-            })
-            ->toArray();
-            
-            return $result;
+            return $users;
         } catch (\Exception $e) {
             error_log("Error fetching top users: " . $e->getMessage());
             return [];
@@ -327,23 +300,25 @@ class PredictionScoringService {
         ];
         
         try {
-            // Using Eloquent for aggregations
-            $total = Prediction::where('user_id', $userId)->count();
-            $pending = Prediction::where('user_id', $userId)->whereNull('accuracy')->count();
-            $accurate = Prediction::where('user_id', $userId)->where('accuracy', '>=', 50)->count();
-            $inaccurate = Prediction::where('user_id', $userId)
-                ->whereNotNull('accuracy')
-                ->where('accuracy', '<', 50)
-                ->count();
-            $avgAccuracy = Prediction::where('user_id', $userId)
-                ->whereNotNull('accuracy')
-                ->avg('accuracy');
+            // Using query builder for complex aggregations
+            $predictionStats = DB::table('predictions')
+                ->select([
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN accuracy IS NULL THEN 1 ELSE 0 END) as pending'),
+                    DB::raw('SUM(CASE WHEN accuracy >= 50 THEN 1 ELSE 0 END) as accurate'),
+                    DB::raw('SUM(CASE WHEN accuracy < 50 AND accuracy IS NOT NULL THEN 1 ELSE 0 END) as inaccurate'),
+                    DB::raw('AVG(CASE WHEN accuracy IS NOT NULL THEN accuracy ELSE NULL END) as avg_accuracy')
+                ])
+                ->where('user_id', $userId)
+                ->first();
             
-            $stats['total'] = $total;
-            $stats['pending'] = $pending;
-            $stats['accurate'] = $accurate;
-            $stats['inaccurate'] = $inaccurate;
-            $stats['avg_accuracy'] = $avgAccuracy ? round((float)$avgAccuracy, 1) : 0;
+            if ($predictionStats) {
+                $stats['total'] = (int)$predictionStats->total;
+                $stats['pending'] = (int)$predictionStats->pending;
+                $stats['accurate'] = (int)$predictionStats->accurate;
+                $stats['inaccurate'] = (int)$predictionStats->inaccurate;
+                $stats['avg_accuracy'] = $predictionStats->avg_accuracy ? round((float)$predictionStats->avg_accuracy, 1) : 0;
+            }
             
             // Get user reputation
             $user = User::find($userId);

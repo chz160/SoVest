@@ -3,8 +3,11 @@
 namespace Database\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Database\Models\Traits\ValidationTrait;
 
 class User extends Model {
+    use ValidationTrait;
+
     // Table name
     protected $table = 'users';
 
@@ -26,6 +29,60 @@ class User extends Model {
         'reputation_score'
     ];
 
+    /**
+     * Validation rules for User model
+     */
+    protected $rules = [
+        'email' => ['required', 'email', 'unique'],
+        'password' => ['required', 'min:6'],
+        'first_name' => ['max:50'],
+        'last_name' => ['max:50']
+    ];
+
+    /**
+     * Custom error messages for validation
+     */
+    protected $messages = [
+        'email.required' => 'Email address is required',
+        'email.email' => 'Please provide a valid email address',
+        'email.unique' => 'This email address is already registered',
+        'password.required' => 'Password is required',
+        'password.min' => 'Password must be at least 6 characters long',
+        'first_name.max' => 'First name cannot exceed 50 characters',
+        'last_name.max' => 'Last name cannot exceed 50 characters'
+    ];
+
+    /**
+     * Validate uniqueness of email in database
+     * 
+     * @param string $attribute
+     * @param mixed $value
+     * @param array $parameters
+     * @return boolean
+     */
+    public function validateUnique($attribute, $value, $parameters = [])
+    {
+        if (empty($value)) {
+            return true;
+        }
+
+        // Build query to check for existing records
+        $query = self::where($attribute, $value);
+        
+        // If updating an existing record, exclude the current record
+        if ($this->exists) {
+            $query->where($this->primaryKey, '!=', $this->{$this->primaryKey});
+        }
+        
+        // If a record with this value exists, validation fails
+        if ($query->exists()) {
+            $this->addError($attribute, $this->getMessage($attribute, 'unique', "The $attribute has already been taken."));
+            return false;
+        }
+        
+        return true;
+    }
+
     // Relationships
     public function predictions()
     {
@@ -45,5 +102,11 @@ class User extends Model {
     public function savedSearches()
     {
         return $this->hasMany(SavedSearch::class, 'user_id');
+    }
+    
+    // Full name accessor
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

@@ -43,8 +43,14 @@ class DatabaseService
     private function __construct()
     {
         // Ensure Eloquent is booted
-        if (!Capsule::getDatabaseManager()) {
-            require_once dirname(__DIR__) . '/bootstrap/database.php';
+        try {
+            // Check if Capsule is initialized
+            if (!isset(Capsule::$instance)) {
+                require_once dirname(__DIR__) . '/bootstrap/database.php';
+            }
+        } catch (Exception $e) {
+            error_log("Error initializing Eloquent in DatabaseService: " . $e->getMessage());
+            // Continue without failing - the DatabaseService methods will handle errors properly
         }
     }
 
