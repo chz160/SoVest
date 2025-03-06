@@ -1,0 +1,15 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# If the requested file or directory exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# For backward compatibility, check if the PHP file exists in the parent directory
+RewriteCond %{DOCUMENT_ROOT}/../%{REQUEST_URI} -f
+RewriteCond %{REQUEST_URI} \.php$
+RewriteRule ^(.*)$ ../$1 [L]
+
+# Otherwise, route all requests to index.php
+RewriteRule ^ index.php [L]

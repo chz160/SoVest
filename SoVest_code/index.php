@@ -1,96 +1,43 @@
-<!doctype html>
-<html lang="en" data-bs-theme="auto">
-	<head>
-    	<meta charset="utf-8">
-    	<meta name="viewport" content="width=device-width, initial-scale=1">
-    	<title>SoVest</title>
-		<link href="css/bootstrap.min.css" rel="stylesheet">   
+<?php
 
-		<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-16x16.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-		<link rel="manifest" href="images/site.webmanifest">	
-		<style>
-			.card-body{
-				width: 70%;
-				padding-left: 30%;
-			}
-		</style>
-  	</head>
-  	<body>
+/**
+ * SoVest Legacy Index Redirect
+ * 
+ * This file redirects requests to the new MVC structure while maintaining backward compatibility.
+ * It serves as a bridge during the transition period.
+ */
 
-		<div class="container py-3">
-  			<header>
-   				<div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-				   <a href="index.php" class="d-flex align-items-center link-body-emphasis text-decoration-none">
-       					<span class="fs-4">SoVest</span>
-					</a>
+// Check if we're accessing directly or from the new MVC structure
+if (!defined('APP_BASE_PATH')) {
+    // Define paths
+    define('APP_BASE_PATH', __DIR__);
+    
+    // Determine if we should use the new MVC structure or maintain backward compatibility
+    $useMvc = false;
+    
+    // Check if the request is for an API endpoint
+    $isApiRequest = (strpos($_SERVER['REQUEST_URI'], '/api/') !== false);
+    
+    // If it's an AJAX request or specifically flagged as an API request, use the new structure
+    if ($isApiRequest || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+        $useMvc = true;
+    }
+    
+    // If we're using the MVC structure, include the bootstrap file
+    if ($useMvc) {
+        $router = require_once APP_BASE_PATH . '/app/bootstrap.php';
+        $router->dispatch();
+        exit;
+    }
+    
+    // Otherwise, this is the original site entry point
+    // We can display the original index page
+    // The rest of this file should contain the original index.php content
+    
+    // Include the original index content
+    include __DIR__ . '/views/index.php';
+    exit;
+}
 
-      				<nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-					  	<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="home.php">Home</a>
-	  					<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="about.php">About SoVest</a>
-      				</nav>
-    			</div>
-
-    			<div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-      				<p class="fs-5 text-body-secondary">SoVest aims to bring stock tips to the people, through a fun and innovative platform.</p>
-    			</div>
- 		 	</header>
-
-			<main>
-
-				<div class="row row-cols-1 row-cols-md-1 mb-1 text-center">
-
-					<div class="col">
-        				<div class="card mb-4 rounded-3 shadow-sm">
-          					<div class="card-header py-3">
-            					<h4 class="my-0 fw-normal">SoVest</h4>
-          					</div>
-          					<div class="card-body">
-							  	<p>Sign up now to access stock picks from talented individuals and make your own predictions to boost that REP score!</p>
-								  <form action="loginCheck.php" method="post">
-
-
-									<div class="form-floating">
-									<input type="email" class="form-control" id="tryEmail" name="tryEmail" required>
-									<label for="tryEmail">Email</label>
-										</div>
-											<br>
-											
-									<!-- SAMPLE PASSWORD FORM (WITH REQUIRED) -->
-										<div class="form-floating">
-									<input type="password" class="form-control" id="tryPass" name="tryPass" required>
-									<label for="tryPass">Password</label>
-										</div>
-										<br>
-									
-
-								<a href="home.php">
-									<button class="btn btn-success w-100 py-2" type="submit">Log In</button>
-								</a>
-									</form>
-								<br>
-								<br>
-								<p>New to SoVest? <a href="acctNew.php">Sign Up Here!</a></p>
-
-							</div>
-        				</div>
-      				</div>
-				</div>
-
-
-			</main>
-
-
-			<footer class="pt-4 my-md-5 pt-md-5 border-top">
-    			<div class="row">
-      				<div class="col-12 col-md">
-						<small class="d-block mb-3 text-body-secondary">Created by Nate Pedigo, Nelson Hayslett</small>
-      				</div>
-				</div>
-			</footer>
- 
-		</div>
-		<script src="js/bootstrap.bundle.min.js"></script>
-	</body>
-</html>
+// If we've reached here, we're being included from the MVC structure
+// This section can be used to define common constants or functions needed by legacy code
