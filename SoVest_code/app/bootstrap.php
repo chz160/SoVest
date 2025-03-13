@@ -7,6 +7,8 @@
  * configuring the environment, and setting up the router.
  */
 
+use App\Handlers\Interfaces\ErrorHandlerInterface;
+
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -91,11 +93,44 @@ spl_autoload_register(function ($class) {
     echo $content;
 });
 
+// Load helpers
+require_once __DIR__ . '/Helpers/route_helpers.php';
+
+// Load the container
+$container = null;
+if (file_exists(APP_BASE_PATH . '/bootstrap/container.php')) {
+    try {
+        // Get the container from ServiceProvider
+        require_once __DIR__ . '/Services/ServiceProvider.php';
+        $container = \App\Services\ServiceProvider::getContainer();
+        
+        // Register global error handler
+        try {
+            // Get error handler instance through ServiceProvider
+            if ($container && $container->has(ErrorHandlerInterface::class)) {
+                $errorHandler = $container->get(ErrorHandlerInterface::class);
+                
+                // Register the error handler to handle PHP errors and exceptions
+                $errorHandler->register();
+            } else {
+                // Fallback if the container isn't available or doesn't have the error handler
+                error_log('Error handler not available in container');
+            }
+        } catch (\Exception $e) {
+            // Log the error but continue application execution
+            error_log('Failed to register error handler: ' . $e->getMessage());
+        }
+    } catch (Exception $e) {
+        error_log("Error loading container: " . $e->getMessage());
+    }
+}
+
 // Load routes
 $routes = require_once __DIR__ . '/Routes/routes.php';
 
-// Initialize router
-$router = new \App\Routes\Router($routes);
+// Initialize router with container
+// Use OptimizedRouter for better performance
+$router = new \App\Routes\OptimizedRouter($routes, '', $container);
 
 // Return the router so it can be used in index.php
 return $router;

@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use Database\Models\User;
 use Exception;
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\ServiceFactory;
 
 /**
  * Auth Controller
@@ -13,19 +15,24 @@ use Exception;
 class AuthController extends Controller
 {
     /**
-     * @var \Services\AuthService Auth service instance
+     * @var AuthServiceInterface Auth service instance
      */
     protected $authService;
     
     /**
      * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (injected)
+     * @param array $services Additional services to inject (optional)
      */
-    public function __construct()
+    public function __construct(AuthServiceInterface $authService = null, array $services = [])
     {
-        parent::__construct();
-        // Load the AuthService, ensuring it's available
-        require_once __DIR__ . '/../../services/AuthService.php';
-        $this->authService = \Services\AuthService::getInstance();
+        parent::__construct($authService, $services);
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->authService === null) {
+            $this->authService = ServiceFactory::createAuthService();
+        }
     }
     
     /**
@@ -36,7 +43,7 @@ class AuthController extends Controller
     public function loginForm()
     {
         // If user is already logged in, redirect to home
-        if ($this->authService->isAuthenticated()) {
+        if ($this->isAuthenticated()) {
             return $this->redirect('home.php');
         }
         
@@ -60,27 +67,56 @@ class AuthController extends Controller
      */
     public function login()
     {
+        // Validate the input
+        $validation = $this->validateRequest([
+            'tryEmail' => 'required|email',
+            'tryPass' => 'required|min:6'
+        ]);
+        
+        if ($validation !== true) {
+            // If validation fails, redirect to login with errors
+            if ($this->isApiRequest()) {
+                $this->jsonError('Login validation failed', $validation);
+            } else {
+                return $this->redirect('login.php', ['error' => 'invalid_credentials']);
+            }
+        }
+        
         // Extract the form data
         $email = $this->input('tryEmail', '');
         $password = $this->input('tryPass', '');
+        $rememberMe = $this->input('remember', false);
         
         try {
             // Attempt to login using AuthService
-            $result = $this->authService->login($email, $password, true);
+            $result = $this->authService->login($email, $password, $rememberMe);
             
+            // Handle the response based on the request type
             if ($result) {
-                // Login successful, redirect to home
-                return $this->redirect('home.php');
+                if ($this->isApiRequest()) {
+                    $this->jsonSuccess('Login successful', ['user' => $result], 'home.php');
+                } else {
+                    // Login successful, redirect to home
+                    return $this->redirect('home.php');
+                }
             } else {
-                // Login failed, redirect to login page with error
-                return $this->redirect('login.php', ['error' => 'invalid_credentials']);
+                if ($this->isApiRequest()) {
+                    $this->jsonError('Invalid credentials');
+                } else {
+                    // Login failed, redirect to login page with error
+                    return $this->redirect('login.php', ['error' => 'invalid_credentials']);
+                }
             }
         } catch (Exception $e) {
             // Log the error
             error_log("Login error: " . $e->getMessage());
             
-            // Redirect to login page with a generic error
-            return $this->redirect('login.php', ['error' => 'system_error']);
+            if ($this->isApiRequest()) {
+                $this->jsonError('System error occurred', [], 500);
+            } else {
+                // Redirect to login page with a generic error
+                return $this->redirect('login.php', ['error' => 'system_error']);
+            }
         }
     }
     
@@ -92,7 +128,7 @@ class AuthController extends Controller
     public function registerForm()
     {
         // If user is already logged in, redirect to home
-        if ($this->authService->isAuthenticated()) {
+        if ($this->isAuthenticated()) {
             return $this->redirect('home.php');
         }
         
@@ -116,6 +152,31 @@ class AuthController extends Controller
      */
     public function register()
     {
+        // Validate the input
+        $validation = $this->validateRequest([
+            'newEmail' => 'required|email',
+            'newPass' => 'required|min:8',
+            'newMajor' => 'required',
+            'newYear' => 'required',
+            'newScholarship' => 'required'
+        ]);
+        
+        if ($validation !== true) {
+            if ($this->isApiRequest()) {
+                $this->jsonError('Registration validation failed', $validation);
+                return;
+            }
+            
+            // For backward compatibility, convert validation errors to simple error codes
+            if (isset($validation['newEmail'])) {
+                return $this->redirect('/register', ['error' => 'invalid_email']);
+            } else if (isset($validation['newPass'])) {
+                return $this->redirect('/register', ['error' => 'password_too_short']);
+            } else {
+                return $this->redirect('/register', ['error' => 'validation_failed']);
+            }
+        }
+        
         // Extract the form data
         $userData = [
             'email' => $this->input('newEmail', ''),
@@ -130,31 +191,46 @@ class AuthController extends Controller
             $userId = $this->authService->register($userData);
             
             if ($userId) {
-                // Registration successful, redirect to login page with success message
-                return $this->redirect('/login', ['success' => 1]);
+                if ($this->isApiRequest()) {
+                    $this->jsonSuccess('Registration successful', ['user_id' => $userId], '/login');
+                } else {
+                    // Registration successful, redirect to login page with success message
+                    return $this->redirect('/login', ['success' => 1]);
+                }
             } else {
                 // Registration failed, check user model for validation errors
                 $user = new User();
-                $user->email = $userData['email'];
-                $user->password = $userData['password'];
+                foreach ($userData as $key => $value) {
+                    if (property_exists($user, $key)) {
+                        $user->$key = $value;
+                    }
+                }
                 $user->validate();
                 $errors = $user->getErrors();
                 
-                if (isset($errors['email'])) {
-                    return $this->redirect('/register', ['error' => 'invalid_email']);
-                } elseif (isset($errors['password'])) {
-                    return $this->redirect('/register', ['error' => 'password_too_short']);
+                if ($this->isApiRequest()) {
+                    $this->jsonError('Registration failed', $errors);
                 } else {
-                    // Generic error for other validation failures
-                    return $this->redirect('/register', ['error' => 'validation_failed']);
+                    if (isset($errors['email'])) {
+                        return $this->redirect('/register', ['error' => 'invalid_email']);
+                    } elseif (isset($errors['password'])) {
+                        return $this->redirect('/register', ['error' => 'password_too_short']);
+                    } else {
+                        // Generic error for other validation failures
+                        return $this->redirect('/register', ['error' => 'validation_failed']);
+                    }
                 }
             }
         } catch (Exception $e) {
             // Log the error
             error_log("Registration error: " . $e->getMessage());
             
-            // Redirect to registration page with error
-            return $this->redirect('/register', ['error' => 'system_error']);
+            if ($this->isApiRequest()) {
+                $this->jsonError('System error occurred', [], 500);
+            } else {
+                // Redirect to registration page with error
+                return $this->redirect('/register', ['error' => 'system_error']);
+            }
         }
     }
     
@@ -168,7 +244,12 @@ class AuthController extends Controller
         // Logout using AuthService
         $this->authService->logout();
         
-        // Redirect to login page
-        return $this->redirect('index.php');
+        // Handle based on request type
+        if ($this->isApiRequest()) {
+            $this->jsonSuccess('Logout successful');
+        } else {
+            // Redirect to index page
+            return $this->redirect('index.php');
+        }
     }
 }

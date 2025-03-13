@@ -9,13 +9,15 @@
 
 // Include the StockDataService
 require_once __DIR__ . '/../services/StockDataService.php';
+require_once __DIR__ . '/../app/Services/ServiceFactory.php';
+require_once __DIR__ . '/../config/api_config.php';
 
 // Log script start
 writeApiLog("Starting scheduled stock price update");
 
 try {
-    // Create service instance
-    $stockService = new StockDataService();
+    // Create service instance using ServiceFactory
+    $stockService = App\Services\ServiceFactory::createStockDataService();
     
     // Update all active stocks
     $results = $stockService->updateAllStocks();

@@ -9,6 +9,9 @@ use Database\Models\Stock;
 use Database\Models\Prediction;
 use Illuminate\Database\Capsule\Manager as DB;
 use Exception;
+use App\Services\Interfaces\SearchServiceInterface;
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\ServiceFactory;
 
 /**
  * Search Controller
@@ -19,28 +22,28 @@ use Exception;
 class SearchController extends Controller
 {
     /**
-     * @var \Services\SearchService Search service instance
+     * @var SearchServiceInterface Search service instance
      */
     protected $searchService;
     
     /**
-     * @var \Services\AuthService Auth service instance
-     */
-    protected $authService;
-    
-    /**
      * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (optional)
+     * @param SearchServiceInterface|null $searchService Search service (optional)
+     * @param array $services Additional services to inject (optional)
      */
-    public function __construct()
+    public function __construct(AuthServiceInterface $authService = null, SearchServiceInterface $searchService = null, array $services = [])
     {
-        parent::__construct();
-        // Load the required services, ensuring they're available
-        require_once __DIR__ . '/../../services/DatabaseService.php';
-        require_once __DIR__ . '/../../services/AuthService.php';
-        require_once __DIR__ . '/../../services/SearchService.php';
+        parent::__construct($authService, $services);
         
-        $this->authService = \Services\AuthService::getInstance();
-        $this->searchService = \Services\SearchService::getInstance();
+        // Initialize search service with dependency injection
+        $this->searchService = $searchService;
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->searchService === null) {
+            $this->searchService = ServiceFactory::createSearchService();
+        }
     }
     
     /**

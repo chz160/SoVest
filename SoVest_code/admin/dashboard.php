@@ -11,13 +11,15 @@ session_start();
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../services/StockDataService.php';
 require_once __DIR__ . '/../services/PredictionScoringService.php';
+require_once __DIR__ . '/../app/Services/ServiceFactory.php';
 
-// Import models and DB facade
+// Import models, DB facade, and ServiceFactory
 use Database\Models\User;
 use Database\Models\Stock;
 use Database\Models\Prediction;
 use Database\Models\StockPrice;
 use Illuminate\Database\Capsule\Manager as DB;
+use App\Services\ServiceFactory;
 
 // Admin authentication
 $isAdmin = false;
@@ -31,9 +33,9 @@ if ($user && isset($user['is_admin']) && $user['is_admin'] == 1) {
     exit();
 }
 
-// Initialize services
-$stockService = new StockDataService();
-$scoringService = new PredictionScoringService();
+// Initialize services using ServiceFactory
+$stockService = ServiceFactory::createStockDataService();
+$scoringService = ServiceFactory::createPredictionScoringService($stockService);
 
 // System statistics
 $stats = [

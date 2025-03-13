@@ -5,6 +5,9 @@ namespace App\Controllers;
 use Database\Models\User;
 use Database\Models\Prediction;
 use Exception;
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\Interfaces\PredictionScoringServiceInterface;
+use App\Services\ServiceFactory;
 
 /**
  * User Controller
@@ -13,6 +16,31 @@ use Exception;
  */
 class UserController extends Controller
 {
+    /**
+     * @var PredictionScoringServiceInterface Prediction scoring service
+     */
+    protected $scoringService;
+
+    /**
+     * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (optional)
+     * @param PredictionScoringServiceInterface|null $scoringService Prediction scoring service (optional)
+     * @param array $services Additional services to inject (optional)
+     */
+    public function __construct(AuthServiceInterface $authService = null, PredictionScoringServiceInterface $scoringService = null, array $services = [])
+    {
+        parent::__construct($authService, $services);
+        
+        // Initialize scoring service with dependency injection
+        $this->scoringService = $scoringService;
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->scoringService === null) {
+            $this->scoringService = ServiceFactory::createPredictionScoringService();
+        }
+    }
+    
     /**
      * Display user account page
      * 
@@ -27,9 +55,8 @@ class UserController extends Controller
         $userData = $this->getAuthUser();
         $userID = $userData['id'];
         
-        // Initialize scoring service to get user stats
-        $scoringService = new \PredictionScoringService();
-        $userStats = $scoringService->getUserPredictionStats($userID);
+        // Use the injected scoring service to get user stats
+        $userStats = $this->scoringService->getUserPredictionStats($userID);
         
         try {
             // Get user predictions with related stock data
@@ -105,9 +132,8 @@ class UserController extends Controller
      */
     public function leaderboard()
     {
-        // Get top users from the scoring service
-        $scoringService = new \PredictionScoringService();
-        $topUsers = $scoringService->getTopUsers(10);
+        // Use the injected scoring service to get top users
+        $topUsers = $this->scoringService->getTopUsers(10);
         
         // Set page title
         $pageTitle = 'Leaderboard';

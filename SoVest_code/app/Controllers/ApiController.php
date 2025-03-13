@@ -9,6 +9,10 @@ use Database\Models\SearchHistory;
 use Database\Models\SavedSearch;
 use Database\Models\PredictionVote;
 use Illuminate\Database\Capsule\Manager as DB;
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\Interfaces\SearchServiceInterface;
+use App\Services\Interfaces\StockDataServiceInterface;
+use App\Services\ServiceFactory;
 
 /**
  * ApiController
@@ -19,11 +23,45 @@ use Illuminate\Database\Capsule\Manager as DB;
 class ApiController extends Controller
 {
     /**
-     * Constructor
+     * @var SearchServiceInterface Search service instance
      */
-    public function __construct()
-    {
-        parent::__construct();
+    protected $searchService;
+    
+    /**
+     * @var StockDataServiceInterface Stock data service instance
+     */
+    protected $stockService;
+    
+    /**
+     * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (optional)
+     * @param SearchServiceInterface|null $searchService Search service (optional)
+     * @param StockDataServiceInterface|null $stockService Stock data service (optional)
+     * @param array $services Additional services to inject (optional)
+     */
+    public function __construct(
+        AuthServiceInterface $authService = null, 
+        SearchServiceInterface $searchService = null,
+        StockDataServiceInterface $stockService = null,
+        array $services = []
+    ) {
+        parent::__construct($authService, $services);
+        
+        // Initialize search service with dependency injection
+        $this->searchService = $searchService;
+        
+        // Initialize stock service with dependency injection
+        $this->stockService = $stockService;
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->searchService === null) {
+            $this->searchService = ServiceFactory::createSearchService();
+        }
+        
+        if ($this->stockService === null) {
+            $this->stockService = ServiceFactory::createStockDataService();
+        }
     }
     
     /**
@@ -302,10 +340,17 @@ class ApiController extends Controller
             return $this->json(['suggestions' => []]);
         }
         
-        $suggestions = [];
-        $searchParam = "%$query%";
-        
         try {
+            // Use search service if available
+            if ($this->searchService) {
+                $suggestions = $this->searchService->getSuggestions($query, $type);
+                return $this->json(['suggestions' => $suggestions]);
+            }
+            
+            // Fallback to direct database queries
+            $suggestions = [];
+            $searchParam = "%$query%";
+            
             // Different suggestion queries based on search type
             switch ($type) {
                 case 'stocks':
@@ -420,6 +465,25 @@ class ApiController extends Controller
         }
         
         try {
+            // Use search service if available
+            if ($this->searchService) {
+                $result = $this->searchService->saveSearch($query, $type);
+                
+                if ($result) {
+                    $savedSearch = SavedSearch::where('user_id', $userID)
+                        ->where('search_query', $query)
+                        ->where('search_type', $type)
+                        ->first();
+                    
+                    return $this->jsonSuccess('Search saved successfully', [
+                        'search_id' => $savedSearch ? $savedSearch->id : null
+                    ]);
+                } else {
+                    return $this->jsonError('Failed to save search');
+                }
+            }
+            
+            // Fallback to direct database operations
             // Check if this search is already saved
             $existingSearch = SavedSearch::where('user_id', $userID)
                                         ->where('search_query', $query)
@@ -453,6 +517,18 @@ class ApiController extends Controller
     private function clearUserSearchHistory($userID)
     {
         try {
+            // Use search service if available
+            if ($this->searchService) {
+                $result = $this->searchService->clearSearchHistory();
+                
+                if ($result) {
+                    return $this->jsonSuccess('Search history cleared');
+                } else {
+                    return $this->jsonSuccess('No search history to clear');
+                }
+            }
+            
+            // Fallback to direct database operations
             SearchHistory::where('user_id', $userID)->delete();
             
             return $this->jsonSuccess('Search history cleared');
@@ -476,6 +552,18 @@ class ApiController extends Controller
         }
         
         try {
+            // Use search service if available
+            if ($this->searchService) {
+                $result = $this->searchService->removeSavedSearch($searchId);
+                
+                if ($result) {
+                    return $this->jsonSuccess('Saved search removed');
+                } else {
+                    return $this->jsonError('Failed to remove saved search: Search not found');
+                }
+            }
+            
+            // Fallback to direct database operations
             SavedSearch::where('id', $searchId)
                       ->where('user_id', $userID)
                       ->delete();

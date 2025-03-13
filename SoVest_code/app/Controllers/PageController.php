@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\ServiceFactory;
+
 /**
  * Page Controller
  * 
@@ -11,6 +14,22 @@ namespace App\Controllers;
  */
 class PageController extends Controller
 {
+    /**
+     * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (optional)
+     * @param array $services Additional services to inject (optional)
+     */
+    public function __construct(AuthServiceInterface $authService = null, array $services = [])
+    {
+        parent::__construct($authService, $services);
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->authService === null) {
+            $this->authService = ServiceFactory::createAuthService();
+        }
+    }
+    
     /**
      * Display the about page
      * 

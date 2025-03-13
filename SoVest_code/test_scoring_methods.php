@@ -3,12 +3,41 @@
  * Test the refactored methods in PredictionScoringService
  */
 
+// Define application path
+define('APP_BASE_PATH', __DIR__);
+
+// Define mock interfaces and traits needed for services and models
+if (!interface_exists('App\\Services\\Interfaces\\StockDataServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface StockDataServiceInterface {}');
+}
+
+if (!interface_exists('App\\Services\\Interfaces\\PredictionScoringServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface PredictionScoringServiceInterface {}');
+}
+
+if (!interface_exists('App\\Services\\Interfaces\\DatabaseServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface DatabaseServiceInterface {}');
+}
+
+if (!trait_exists('Database\\Models\\Traits\\ValidationTrait')) {
+    eval('namespace Database\\Models\\Traits; trait ValidationTrait { public function validate() { return true; } }');
+}
+
 // Include necessary files
 require_once __DIR__ . '/includes/db_config.php';
+require_once __DIR__ . '/services/StockDataService.php';
 require_once __DIR__ . '/services/PredictionScoringService.php';
+require_once __DIR__ . '/app/Services/ServiceFactory.php';
 
-// Create an instance of the service
-$scoringService = new PredictionScoringService();
+// Create the StockDataService and PredictionScoringService directly
+// due to issues with the ServiceFactory in the test environment
+$stockDataService = new \Services\StockDataService();
+$scoringService = new \Services\PredictionScoringService($stockDataService);
+
+// Note: In production code, you would use:
+// $scoringService = \App\Services\ServiceFactory::createPredictionScoringService();
+
+echo "Created PredictionScoringService instance with dependency injection.\n\n";
 
 // Test output function
 function outputTestResult($name, $success, $details = null) {

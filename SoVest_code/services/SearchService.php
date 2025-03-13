@@ -11,6 +11,7 @@
 
 namespace Services;
 
+use App\Services\Interfaces\SearchServiceInterface;
 use Database\Models\SearchHistory;
 use Database\Models\SavedSearch;
 use Database\Models\Stock;
@@ -19,7 +20,7 @@ use Database\Models\Prediction;
 use Exception;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class SearchService
+class SearchService implements SearchServiceInterface
 {
     /**
      * @var SearchService|null Singleton instance of the service
@@ -51,12 +52,19 @@ class SearchService
     }
     
     /**
-     * Private constructor to enforce singleton pattern
+     * Constructor - now public to support dependency injection
+     * while maintaining backward compatibility with singleton pattern
+     * 
+     * @param DatabaseService $db Database service instance (optional)
+     * @param AuthService $auth Auth service instance (optional)
      */
-    private function __construct()
+    public function __construct(DatabaseService $db = null, AuthService $auth = null)
     {
-        $this->db = \Services\DatabaseService::getInstance();
-        $this->auth = \Services\AuthService::getInstance();
+        // Initialize database service with dependency injection or fallback to singleton
+        $this->db = $db ?: DatabaseService::getInstance();
+        
+        // Initialize auth service with dependency injection or fallback to singleton
+        $this->auth = $auth ?: AuthService::getInstance();
     }
     
     /**

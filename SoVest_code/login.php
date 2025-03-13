@@ -3,18 +3,20 @@
  * SoVest - Login Page
  * 
  * Displays the login form and verifies database connectivity.
- * Uses DatabaseService for database operations.
+ * Uses ServiceFactory for obtaining database service.
  */
 
 // Include database configuration
 require_once 'includes/db_config.php';
+// Import ServiceFactory
+require_once 'app/Services/ServiceFactory.php';
 
-// Import DatabaseService
-use Services\DatabaseService;
+// Import ServiceFactory
+use App\Services\ServiceFactory;
 
-// Check database connectivity using DatabaseService
+// Check database connectivity using ServiceFactory
 try {
-    $dbService = DatabaseService::getInstance();
+    $dbService = ServiceFactory::createDatabaseService();
     // Just getting the connection validates it's working
     $dbService->getConnection();
 } catch (Exception $e) {

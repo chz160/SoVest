@@ -4,7 +4,18 @@
  * 
  * This service evaluates stock predictions against actual performance
  * and calculates user reputation scores based on prediction accuracy.
+ * It supports both dependency injection and singleton pattern for backward compatibility.
  */
+
+namespace Services;
+
+use App\Services\Interfaces\PredictionScoringServiceInterface;
+use Database\Models\User;
+use Database\Models\Prediction;
+use Database\Models\Stock;
+use Database\Models\StockPrice;
+use Illuminate\Database\Capsule\Manager as DB;
+use Carbon\Carbon;
 
 // Load autoloader first to make sure all classes are available
 if (file_exists(dirname(dirname(__DIR__)) . '/vendor/autoload.php')) {
@@ -21,22 +32,40 @@ require_once __DIR__ . '/../database/models/Stock.php';
 require_once __DIR__ . '/../database/models/Prediction.php';
 require_once __DIR__ . '/../database/models/StockPrice.php';
 
-use Database\Models\User;
-use Database\Models\Prediction;
-use Database\Models\Stock;
-use Database\Models\StockPrice;
-use Illuminate\Database\Capsule\Manager as DB;
-use Carbon\Carbon;
-
-class PredictionScoringService {
+class PredictionScoringService implements PredictionScoringServiceInterface {
+    /**
+     * @var PredictionScoringService|null Singleton instance of the service
+     */
+    private static $instance = null;
+    
+    /**
+     * @var \Services\StockDataService The stock data service instance
+     */
     private $stockService;
     
     /**
-     * Constructor - initializes stock service
+     * Get the singleton instance of PredictionScoringService
+     *
+     * @return PredictionScoringService
      */
-    public function __construct() {
-        // Initialize stock data service
-        $this->stockService = new StockDataService();
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+    
+    /**
+     * Constructor - supports dependency injection for StockDataService
+     * while maintaining backward compatibility with singleton pattern
+     *
+     * @param \Services\StockDataService $stockService Stock data service (optional)
+     */
+    public function __construct($stockService = null) {
+        // Initialize stock data service with dependency injection or fallback to singleton
+        $this->stockService = $stockService ?: \Services\StockDataService::getInstance();
     }
     
     /**

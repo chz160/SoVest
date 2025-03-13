@@ -16,9 +16,9 @@
         $userID = $_COOKIE["userID"];
     }
 
-    // Include the StockDataService
-    require_once __DIR__ . '/services/StockDataService.php';
-    $stockService = new StockDataService();
+    // Get StockDataService via ServiceFactory
+    require_once __DIR__ . '/app/Services/ServiceFactory.php';
+    $stockService = App\Services\ServiceFactory::createStockDataService();
 
     // Get all active stocks for the dropdown
     $stocks = $stockService->getStocks(true);

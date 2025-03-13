@@ -10,13 +10,14 @@
 
 namespace Services;
 
+use App\Services\Interfaces\DatabaseServiceInterface;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Exception;
 use PDO;
 
-class DatabaseService
+class DatabaseService implements DatabaseServiceInterface
 {
     /**
      * @var DatabaseService|null Singleton instance of the service
@@ -38,9 +39,10 @@ class DatabaseService
     }
 
     /**
-     * Private constructor to enforce singleton pattern
+     * Constructor - now public to support dependency injection
+     * while maintaining backward compatibility with singleton pattern
      */
-    private function __construct()
+    public function __construct()
     {
         // Ensure Eloquent is booted
         try {

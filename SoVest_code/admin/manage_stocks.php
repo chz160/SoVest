@@ -6,8 +6,9 @@
  */
 session_start();
 
-// Include the StockDataService
+// Include the StockDataService and ServiceFactory
 require_once __DIR__ . '/../services/StockDataService.php';
+require_once __DIR__ . '/../app/Services/ServiceFactory.php';
 
 // Check if user is logged in and is admin
 // TODO: Implement proper admin check
@@ -19,7 +20,7 @@ if (!$isAdmin) {
 }
 
 // Initialize stock service
-$stockService = new StockDataService();
+$stockService = App\Services\ServiceFactory::createStockDataService();
 
 // Handle form submissions
 $message = '';

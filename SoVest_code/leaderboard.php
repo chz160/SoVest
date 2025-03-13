@@ -13,12 +13,13 @@ if ($isLoggedIn) {
     $userID = $_SESSION['user_id'] ?? $_COOKIE["userID"];
 }
 
-// Include the prediction scoring service to get top users
+// Include the prediction scoring service and ServiceFactory
 require_once 'bootstrap/database.php';
 require_once 'services/PredictionScoringService.php';
+require_once 'app/Services/ServiceFactory.php';
 
-// Create an instance of the service
-$scoringService = new PredictionScoringService();
+// Create an instance of the service using ServiceFactory
+$scoringService = App\Services\ServiceFactory::createPredictionScoringService();
 
 // Get top users from the service
 $topUsers = $scoringService->getTopUsers(20);

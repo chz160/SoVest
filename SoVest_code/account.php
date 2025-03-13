@@ -13,11 +13,13 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db_config.php';
 require_once __DIR__ . '/includes/prediction_score_display.php';
 require_once __DIR__ . '/services/PredictionScoringService.php';
+require_once __DIR__ . '/app/Services/ServiceFactory.php';
 require_once __DIR__ . '/bootstrap/database.php';  // Include Eloquent bootstrap
 
 // Import model classes
 use Database\Models\Prediction;
 use Exception;
+use App\Services\ServiceFactory;
 
 // Require authentication
 requireAuthentication();
@@ -29,8 +31,8 @@ $userID = $userData['id'];
 // Get database connection
 $conn = getDbConnection();
 
-// Initialize scoring service to get user stats
-$scoringService = new PredictionScoringService();
+// Initialize scoring service to get user stats using ServiceFactory
+$scoringService = ServiceFactory::createPredictionScoringService();
 $userStats = $scoringService->getUserPredictionStats($userID);
 
 // Get user's predictions using Eloquent ORM

@@ -1,23 +1,44 @@
 <?php
 /**
- * SoVest Stock Data Service
- * 
- * This service is responsible for fetching, storing, and managing stock data
+ * SoVest - Stock Data Service
+ *
+ * This service provides functionality for managing stock data and prices.
+ * It centralizes all stock data operations for easier maintenance.
  */
 
-// Include config file
-require_once __DIR__ . '/../config/api_config.php';
-require_once __DIR__ . '/../bootstrap/database.php';
+namespace Services;
 
+use App\Services\Interfaces\StockDataServiceInterface;
 use Database\Models\Stock;
 use Database\Models\StockPrice;
-use Illuminate\Database\Capsule\Manager as DB;
+use Exception;
 
-class StockDataService {
+class StockDataService implements StockDataServiceInterface
+{
+    /**
+     * @var StockDataService|null Singleton instance of the service
+     */
+    private static $instance = null;
+
+    /**
+     * Get the singleton instance of StockDataService
+     *
+     * @return StockDataService
+     */
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
     private $lastApiCall = 0;
     
     /**
-     * Constructor
+     * Constructor - public to support dependency injection
+     * while maintaining backward compatibility with singleton pattern
      */
     public function __construct() {
         // No need to establish database connection as Eloquent handles it
@@ -57,7 +78,7 @@ class StockDataService {
             // Fetch initial price data
             $this->fetchAndStoreStockData($symbol);
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error adding stock: " . $e->getMessage());
             return false;
         }
@@ -86,7 +107,7 @@ class StockDataService {
             }
             
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error removing stock: " . $e->getMessage());
             return false;
         }
@@ -107,7 +128,7 @@ class StockDataService {
             }
             
             return $query->orderBy('symbol')->get()->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error getting stocks: " . $e->getMessage());
             return [];
         }
@@ -213,7 +234,7 @@ class StockDataService {
             $stock->save();
             
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error storing price: " . $e->getMessage());
             return false;
         }
@@ -246,7 +267,7 @@ class StockDataService {
             }
             
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error getting latest price: " . $e->getMessage());
             return false;
         }
@@ -289,7 +310,7 @@ class StockDataService {
             }
             
             return $history;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             writeApiLog("Error getting price history: " . $e->getMessage());
             return [];
         }
@@ -346,12 +367,4 @@ class StockDataService {
             }
         }
     }
-    
-    /**
-     * Destructor - no action needed as Eloquent manages connections
-     */
-    public function __destruct() {
-        // No need to close connections with Eloquent
-    }
 }
-?>

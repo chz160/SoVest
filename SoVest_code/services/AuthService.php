@@ -11,8 +11,9 @@ namespace Services;
 
 use Database\Models\User;
 use Exception;
+use App\Services\Interfaces\AuthServiceInterface;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     /**
      * @var AuthService|null Singleton instance of the service
@@ -34,9 +35,10 @@ class AuthService
     }
 
     /**
-     * Private constructor to enforce singleton pattern
+     * Constructor - now public to support dependency injection
+     * while maintaining backward compatibility with singleton pattern
      */
-    private function __construct()
+    public function __construct()
     {
         // Ensure sessions are started
         if (session_status() === PHP_SESSION_NONE) {

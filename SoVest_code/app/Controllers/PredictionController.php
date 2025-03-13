@@ -7,6 +7,9 @@ use Database\Models\Stock;
 use Database\Models\User;
 use Database\Models\PredictionVote;
 use Illuminate\Database\Capsule\Manager as DB;
+use App\Services\Interfaces\StockDataServiceInterface;
+use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\ServiceFactory;
 
 /**
  * PredictionController
@@ -16,6 +19,31 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class PredictionController extends Controller
 {
+    /**
+     * @var StockDataServiceInterface Stock data service
+     */
+    protected $stockService;
+    
+    /**
+     * Constructor
+     * 
+     * @param AuthServiceInterface|null $authService Authentication service (optional)
+     * @param StockDataServiceInterface|null $stockService Stock data service (optional)
+     * @param array $services Additional services to inject (optional)
+     */
+    public function __construct(AuthServiceInterface $authService = null, StockDataServiceInterface $stockService = null, array $services = [])
+    {
+        parent::__construct($authService, $services);
+        
+        // Initialize stock service with dependency injection
+        $this->stockService = $stockService;
+        
+        // Fallback to ServiceFactory for backward compatibility
+        if ($this->stockService === null) {
+            $this->stockService = ServiceFactory::createStockDataService();
+        }
+    }
+    
     /**
      * Display a list of the user's predictions
      */
@@ -66,12 +94,8 @@ class PredictionController extends Controller
         $this->requireAuth();
         
         try {
-            // Include the StockDataService
-            require_once __DIR__ . '/../../services/StockDataService.php';
-            $stockService = new \StockDataService();
-            
-            // Get all active stocks for the dropdown
-            $stocks = $stockService->getStocks(true);
+            // Get all active stocks for the dropdown using the injected service
+            $stocks = $this->stockService->getStocks(true);
             
             // Render the create prediction form
             $this->render('prediction/create', [
@@ -143,10 +167,8 @@ class PredictionController extends Controller
                 } else {
                     $this->withModelErrors($prediction);
                     
-                    // Include the StockDataService for the form
-                    require_once __DIR__ . '/../../services/StockDataService.php';
-                    $stockService = new \StockDataService();
-                    $stocks = $stockService->getStocks(true);
+                    // Get stocks using the injected service for the form
+                    $stocks = $this->stockService->getStocks(true);
                     
                     // Re-render the form with errors
                     $this->render('prediction/create', [
@@ -214,12 +236,8 @@ class PredictionController extends Controller
             $prediction['symbol'] = $predictionModel->stock->symbol;
             $prediction['company_name'] = $predictionModel->stock->company_name;
             
-            // Include the StockDataService
-            require_once __DIR__ . '/../../services/StockDataService.php';
-            $stockService = new \StockDataService();
-            
-            // Get all active stocks for the dropdown
-            $stocks = $stockService->getStocks(true);
+            // Get all active stocks for the dropdown using the injected service
+            $stocks = $this->stockService->getStocks(true);
             
             // Render the edit form
             $this->render('prediction/create', [

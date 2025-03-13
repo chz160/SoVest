@@ -7,8 +7,23 @@
  * 0 0 * * * php /path/to/SoVest/SoVest_code/cron/evaluate_predictions.php
  */
 
-// Include the PredictionScoringService
+// Define mock interfaces needed for services, only if they don't exist
+if (!interface_exists('App\\Services\\Interfaces\\StockDataServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface StockDataServiceInterface {}');
+}
+
+if (!interface_exists('App\\Services\\Interfaces\\PredictionScoringServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface PredictionScoringServiceInterface {}');
+}
+
+if (!interface_exists('App\\Services\\Interfaces\\DatabaseServiceInterface')) {
+    eval('namespace App\\Services\\Interfaces; interface DatabaseServiceInterface {}');
+}
+
+// Include the required services
+require_once __DIR__ . '/../services/StockDataService.php';
 require_once __DIR__ . '/../services/PredictionScoringService.php';
+require_once __DIR__ . '/../app/Services/ServiceFactory.php';
 
 // Set error logging
 ini_set('display_errors', 0);
@@ -37,8 +52,8 @@ function logMessage($message) {
 logMessage("Starting scheduled prediction evaluation");
 
 try {
-    // Create service instance
-    $scoringService = new PredictionScoringService();
+    // Create service instance using ServiceFactory
+    $scoringService = \App\Services\ServiceFactory::createPredictionScoringService();
     
     // Evaluate all active predictions
     $results = $scoringService->evaluateActivePredictions();

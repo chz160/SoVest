@@ -47,7 +47,28 @@ if (!$databaseServiceFound) {
     error_log("Warning: DatabaseService.php could not be found in any standard location");
 }
 
+// Import ServiceFactory
+$serviceFactoryPaths = [
+    __DIR__ . '/../app/Services/ServiceFactory.php',  // SoVest_code/app/Services relative to includes
+    dirname(dirname(__DIR__)) . '/SoVest_code/app/Services/ServiceFactory.php', // From project root
+    __DIR__ . '/../../app/Services/ServiceFactory.php', // Alternative path
+];
+
+$serviceFactoryFound = false;
+foreach ($serviceFactoryPaths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        $serviceFactoryFound = true;
+        break;
+    }
+}
+
+if (!$serviceFactoryFound) {
+    error_log("Warning: ServiceFactory.php could not be found in any standard location");
+}
+
 use Services\DatabaseService;
+use App\Services\ServiceFactory;
 
 // Load environment variables from .env file
 function loadEnvVariables() {
@@ -229,9 +250,9 @@ function getDbConnection() {
         throw new Exception("Database connection failed. Please ensure DatabaseService is available and properly configured.");
     }
     
-    // Use DatabaseService - no fallback to mysqli anymore
+    // Use DatabaseService via ServiceFactory - no fallback to mysqli anymore
     try {
-        $dbService = DatabaseService::getInstance();
+        $dbService = ServiceFactory::createDatabaseService();
         $conn = $dbService->getConnection();
         return $conn;
     } catch (Exception $e) {
@@ -289,7 +310,7 @@ function sanitizeDbInput($data, $conn = null) {
     }
     
     try {
-        $dbService = DatabaseService::getInstance();
+        $dbService = ServiceFactory::createDatabaseService();
         $quotedStr = $dbService->sanitizeInput(trim($data));
         
         // Remove quotes added by PDO::quote
@@ -342,7 +363,7 @@ function executeQuery($sql, $conn = null) {
     }
     
     try {
-        $dbService = DatabaseService::getInstance();
+        $dbService = ServiceFactory::createDatabaseService();
         return $dbService->executeQuery($sql, $bindings);
     } catch (Exception $e) {
         error_log("DatabaseService query failed: " . $e->getMessage() . " - Query: " . $sql);
