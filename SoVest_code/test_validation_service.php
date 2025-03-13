@@ -10,7 +10,7 @@ require_once __DIR__ . '/services/ValidationService.php';
 require_once __DIR__ . '/app/Services/Interfaces/ValidationServiceInterface.php';
 require_once __DIR__ . '/app/Services/ServiceProvider.php';
 
-use Services\ValidationService;
+use App\Services\ValidationService;
 use App\Services\ServiceProvider;
 
 echo "=== ValidationService Test ===\n\n";

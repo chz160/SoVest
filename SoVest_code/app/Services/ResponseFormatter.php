@@ -6,7 +6,7 @@
  * for different formats (JSON, HTML, XML) and response types (success, error).
  */
 
-namespace Services;
+namespace App\Services;
 
 // Handle the case where autoloading isn't set up
 if (!interface_exists('App\\Services\\Interfaces\\ResponseFormatterInterface')) {

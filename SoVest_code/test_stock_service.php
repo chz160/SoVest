@@ -3,8 +3,11 @@
  * Test script for the Stock Data Service
  */
 
-// Include the StockDataService
-require_once __DIR__ . '/services/StockDataService.php';
+// Include autoloader
+require_once __DIR__ . '/test_autoload.php';
+
+// Use the StockDataService class
+use App\Services\StockDataService;
 
 echo "Initializing StockDataService...\n";
 

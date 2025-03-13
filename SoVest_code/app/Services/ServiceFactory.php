@@ -12,11 +12,11 @@ namespace App\Services;
 
 use DI\Container;
 use Exception;
-use Services\AuthService;
-use Services\DatabaseService;
-use Services\SearchService;
-use Services\StockDataService;
-use Services\PredictionScoringService;
+use App\Services\AuthService;
+use App\Services\DatabaseService;
+use App\Services\SearchService;
+use App\Services\StockDataService;
+use App\Services\PredictionScoringService;
 use App\Handlers\ErrorHandler;
 use App\Handlers\Interfaces\ErrorHandlerInterface;
 

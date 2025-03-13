@@ -20,7 +20,7 @@ require_once __DIR__ . '/app/bootstrap.php';
 
 // Import the required classes
 use App\Controllers\AuthController;
-use Services\AuthService;
+use App\Services\AuthService;
 use App\Services\ServiceProvider;
 
 echo "Testing AuthController with Dependency Injection\n";

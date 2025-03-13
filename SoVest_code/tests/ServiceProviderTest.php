@@ -19,7 +19,7 @@ require_once APP_BASE_PATH . '/services/AuthService.php';
 require_once APP_BASE_PATH . '/app/Services/ServiceProvider.php';
 
 use App\Services\ServiceProvider;
-use Services\AuthService;
+use App\Services\AuthService;
 
 // Test container access
 $container = ServiceProvider::getContainer();

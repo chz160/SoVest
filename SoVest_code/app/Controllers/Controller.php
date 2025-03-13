@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Middleware\MiddlewareInterface;
+use App\Services\AuthService;
 use App\Services\Interfaces\AuthServiceInterface;
 use App\Services\Interfaces\ResponseFormatterInterface;
 use App\Services\ServiceFactory;
@@ -180,8 +181,8 @@ class Controller
             }
             
             // If still null, try singleton pattern for backward compatibility
-            if ($this->authService === null && class_exists('Services\\AuthService')) {
-                $this->authService = \Services\AuthService::getInstance();
+            if ($this->authService === null && class_exists('App\\Services\\AuthService')) {
+                $this->authService = \App\Services\AuthService::getInstance();
             }
         }
     }

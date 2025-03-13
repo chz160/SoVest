@@ -87,14 +87,14 @@ if ($results['files_exist']['services/SearchService.php']) {
     
     // Test section: Class structure and singleton pattern
     echo "Testing SearchService class structure...\n";
-    $serviceExists = class_exists('\\Services\\SearchService');
+    $serviceExists = class_exists('\\App\\Services\\SearchService');
     $results['class_structure']['service_exists'] = $serviceExists;
     echo " - SearchService class: " . ($serviceExists ? "FOUND" : "MISSING") . "\n";
     
     if ($serviceExists) {
         // Test singleton pattern
         try {
-            $reflectionSearchService = new ReflectionClass('\\Services\\SearchService');
+            $reflectionSearchService = new ReflectionClass('\\App\\Services\\SearchService');
             $constructor = $reflectionSearchService->getConstructor();
             $constructorIsPrivate = $constructor && $constructor->isPrivate();
             $results['class_structure']['singleton_pattern'] = $constructorIsPrivate;
@@ -115,7 +115,7 @@ if ($results['files_exist']['services/SearchService.php']) {
         // Test method signatures
         echo "\nChecking required methods in SearchService...\n";
         foreach ($requiredServiceMethods as $method) {
-            $hasMethod = method_exists('\\Services\\SearchService', $method);
+            $hasMethod = method_exists('\\App\\Services\\SearchService', $method);
             $results['method_signatures']['service_' . $method] = $hasMethod;
             echo " - Method '" . $method . "': " . ($hasMethod ? "FOUND" : "MISSING") . "\n";
         }
@@ -124,8 +124,8 @@ if ($results['files_exist']['services/SearchService.php']) {
         if ($canTestSingleton) {
             try {
                 echo "\nTesting singleton behavior...\n";
-                $instance1 = \Services\SearchService::getInstance();
-                $instance2 = \Services\SearchService::getInstance();
+                $instance1 = \App\Services\SearchService::getInstance();
+                $instance2 = \App\Services\SearchService::getInstance();
                 $isSameInstance = ($instance1 === $instance2);
                 $results['class_structure']['same_instance'] = $isSameInstance;
                 echo " - Multiple getInstance() calls return same instance: " . 

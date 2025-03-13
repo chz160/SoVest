@@ -18,10 +18,10 @@ spl_autoload_register(function ($class) {
         }
     }
     
-    $prefix = 'Services\\';
+    $prefix = 'App\\Services\\';
     if (strpos($class, $prefix) === 0) {
         $relativeClass = substr($class, strlen($prefix));
-        $file = __DIR__ . '/services/' . $relativeClass . '.php';
+        $file = __DIR__ . '/app/Services/' . $relativeClass . '.php';
         if (file_exists($file)) {
             require $file;
             return true;
@@ -35,9 +35,9 @@ spl_autoload_register(function ($class) {
 require_once __DIR__ . '/app/Services/Interfaces/ResponseFormatterInterface.php';
 
 // Include implementation
-require_once __DIR__ . '/services/ResponseFormatter.php';
+require_once __DIR__ . '/app/Services/ResponseFormatter.php';
 
-use Services\ResponseFormatter;
+use App\Services\ResponseFormatter;
 use App\Services\Interfaces\ResponseFormatterInterface;
 
 echo "ResponseFormatter Service Test\n";

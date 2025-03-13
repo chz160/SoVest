@@ -31,13 +31,16 @@ ob_start();
 
 echo "=== AuthService Test Script ===\n\n";
 
-// Load the required service
-require_once __DIR__ . '/services/AuthService.php';
+// Load the autoloader
+require_once __DIR__ . '/test_autoload.php';
+
+// Use AuthService from App\Services namespace
+use App\Services\AuthService;
 
 // Test 1: Get singleton instance
 try {
-    $authService = Services\AuthService::getInstance();
-    $testPassed = $authService instanceof Services\AuthService;
+    $authService = AuthService::getInstance();
+    $testPassed = $authService instanceof AuthService;
     $allTestsPassed = $allTestsPassed && $testPassed;
     testResult("Get singleton instance", $testPassed);
 } catch (Exception $e) {
@@ -105,7 +108,7 @@ try {
 // Test 7: Test authentication mechanisms using reflection
 try {
     // Create a reflector to access private method
-    $reflector = new ReflectionClass('Services\AuthService');
+    $reflector = new ReflectionClass('App\Services\AuthService');
     $setAuthMethod = $reflector->getMethod('setAuthCookieAndSession');
     $setAuthMethod->setAccessible(true);
     

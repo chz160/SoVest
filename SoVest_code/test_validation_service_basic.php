@@ -18,7 +18,7 @@ interface ValidationServiceInterface {
 require_once __DIR__ . '/services/ValidationService.php';
 
 // Create test class that removes dependency
-class TestValidationService extends \Services\ValidationService {
+class TestValidationService extends \App\Services\ValidationService {
     // Constructor override to avoid dependency issues
     public function __construct() {
         parent::__construct();

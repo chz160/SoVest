@@ -13,7 +13,7 @@ namespace App\Services\Interfaces {
 }
 
 // Mock services
-namespace Services {
+namespace App\Services {
     // Mock StockDataService for testing
     class StockDataService implements \App\Services\Interfaces\StockDataServiceInterface {
         public static function getInstance() {
@@ -69,17 +69,17 @@ namespace {
          * @param StockDataService|null $stockDataService Optional stock data service dependency
          * @return PredictionScoringService
          */
-        public static function createPredictionScoringService(\Services\StockDataService $stockDataService = null)
+        public static function createPredictionScoringService(\App\Services\StockDataService $stockDataService = null)
         {
             try {
                 $container = null; // Mock container to force direct instantiation
                 
                 // PredictionScoringService now supports constructor injection
                 // Use the provided stockDataService if available
-                return new \Services\PredictionScoringService($stockDataService);
+                return new \App\Services\PredictionScoringService($stockDataService);
             } catch (Exception $e) {
                 // Fall back to direct instantiation with dependency injection
-                return new \Services\PredictionScoringService($stockDataService);
+                return new \App\Services\PredictionScoringService($stockDataService);
             }
         }
     }
@@ -87,20 +87,20 @@ namespace {
     echo "Testing PredictionScoringService factory with dependency injection...\n\n";
     
     // Create a stock data service
-    $stockService = new \Services\StockDataService();
+    $stockService = new \App\Services\StockDataService();
     echo "StockDataService created.\n";
     
     // Test creating PredictionScoringService with null parameter (should use fallback)
     echo "\nTest 1: Create with null parameter (should use fallback)\n";
     $scoringService1 = TestServiceFactory::createPredictionScoringService(null);
-    echo "PredictionScoringService created: " . (($scoringService1 instanceof \Services\PredictionScoringService) ? "YES" : "NO") . "\n";
-    echo "Has StockService dependency: " . (($scoringService1->getStockService() instanceof \Services\StockDataService) ? "YES" : "NO") . "\n";
+    echo "PredictionScoringService created: " . (($scoringService1 instanceof \App\Services\PredictionScoringService) ? "YES" : "NO") . "\n";
+    echo "Has StockService dependency: " . (($scoringService1->getStockService() instanceof \App\Services\StockDataService) ? "YES" : "NO") . "\n";
     
     // Test creating PredictionScoringService with explicit dependency
     echo "\nTest 2: Create with explicit dependency\n";
     $scoringService2 = TestServiceFactory::createPredictionScoringService($stockService);
-    echo "PredictionScoringService created: " . (($scoringService2 instanceof \Services\PredictionScoringService) ? "YES" : "NO") . "\n";
-    echo "Has StockService dependency: " . (($scoringService2->getStockService() instanceof \Services\StockDataService) ? "YES" : "NO") . "\n";
+    echo "PredictionScoringService created: " . (($scoringService2 instanceof \App\Services\PredictionScoringService) ? "YES" : "NO") . "\n";
+    echo "Has StockService dependency: " . (($scoringService2->getStockService() instanceof \App\Services\StockDataService) ? "YES" : "NO") . "\n";
     echo "Is the same StockService instance: " . (($scoringService2->getStockService() === $stockService) ? "YES" : "NO") . "\n";
     
     echo "\nPredictionScoringService factory testing complete.\n";

@@ -8,13 +8,13 @@
  */
 
 // Use statements for services and interfaces
-use Services\AuthService;
-use Services\DatabaseService;
-use Services\SearchService;
-use Services\StockDataService;
-use Services\PredictionScoringService;
-use Services\ValidationService;
-use Services\ResponseFormatter;
+use App\Services\AuthService;
+use App\Services\DatabaseService;
+use App\Services\SearchService;
+use App\Services\StockDataService;
+use App\Services\PredictionScoringService;
+use App\Services\ValidationService;
+use App\Services\ResponseFormatter;
 use App\Services\Interfaces\AuthServiceInterface;
 use App\Services\Interfaces\DatabaseServiceInterface;
 use App\Services\Interfaces\SearchServiceInterface;

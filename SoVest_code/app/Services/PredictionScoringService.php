@@ -7,7 +7,7 @@
  * It supports both dependency injection and singleton pattern for backward compatibility.
  */
 
-namespace Services;
+namespace App\Services;
 
 use App\Services\Interfaces\PredictionScoringServiceInterface;
 use Database\Models\User;

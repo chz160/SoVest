@@ -9,7 +9,7 @@
  * @package Services
  */
 
-namespace Services;
+namespace App\Services;
 
 use App\Services\Interfaces\SearchServiceInterface;
 use Database\Models\SearchHistory;

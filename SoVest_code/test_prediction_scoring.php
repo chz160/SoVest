@@ -44,8 +44,8 @@ require_once __DIR__ . '/app/Services/ServiceFactory.php';
 
 // Create the StockDataService and PredictionScoringService directly
 // due to issues with the ServiceFactory in the test environment
-$stockDataService = new \Services\StockDataService();
-$service = new \Services\PredictionScoringService($stockDataService);
+$stockDataService = new \App\Services\StockDataService();
+$service = new \App\Services\PredictionScoringService($stockDataService);
 
 // Note: In production code, you would use:
 // $service = \App\Services\ServiceFactory::createPredictionScoringService();

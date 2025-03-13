@@ -7,7 +7,7 @@
  * It centralizes all auth-related logic for easier maintenance.
  */
 
-namespace Services;
+namespace App\Services;
 
 use Database\Models\User;
 use Exception;

@@ -2,7 +2,7 @@
 
 namespace App\Middleware;
 
-use Services\AuthService;
+use App\Services\AuthService;
 use App\Services\Interfaces\AuthServiceInterface;
 
 /**

@@ -9,7 +9,7 @@ require_once __DIR__ . '/services/DatabaseService.php';
 
 // Try to get an instance of DatabaseService
 try {
-    $dbService = \Services\DatabaseService::getInstance();
+    $dbService = \App\Services\DatabaseService::getInstance();
     echo "Successfully created DatabaseService instance<br>";
     
     // Try to execute a simple query

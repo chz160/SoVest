@@ -6,7 +6,7 @@
  * It supports complex validation scenarios with nested rules and detailed error messages.
  */
 
-namespace Services;
+namespace App\Services;
 
 // Handle the case where autoloading isn't set up
 if (!interface_exists('App\Services\Interfaces\ValidationServiceInterface')) {

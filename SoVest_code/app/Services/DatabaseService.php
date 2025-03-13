@@ -8,7 +8,7 @@
  * It follows PSR standards and provides proper error handling
  */
 
-namespace Services;
+namespace App\Services;
 
 use App\Services\Interfaces\DatabaseServiceInterface;
 use Illuminate\Database\Capsule\Manager as Capsule;

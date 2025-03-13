@@ -6,7 +6,7 @@
  * It centralizes all stock data operations for easier maintenance.
  */
 
-namespace Services;
+namespace App\Services;
 
 use App\Services\Interfaces\StockDataServiceInterface;
 use Database\Models\Stock;

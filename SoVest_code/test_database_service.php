@@ -9,7 +9,7 @@
 require 'vendor/autoload.php';
 require 'services/DatabaseService.php';
 
-use Services\DatabaseService;
+use App\Services\DatabaseService;
 
 // Get the DatabaseService instance
 $dbService = DatabaseService::getInstance();
