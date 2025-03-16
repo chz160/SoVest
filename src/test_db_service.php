@@ -1,6 +1,10 @@
 <?php
 // Test file for DatabaseService
 
+/*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Include database configuration
 require_once __DIR__ . '/includes/db_config.php';
 

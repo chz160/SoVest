@@ -6,6 +6,10 @@
  * as a replacement for legacy mysqli functions.
  */
 
+/*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 require 'vendor/autoload.php';
 require 'services/DatabaseService.php';
 

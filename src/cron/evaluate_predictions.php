@@ -7,6 +7,12 @@
  * 0 0 * * * php /path/to/SoVest/SoVest_code/cron/evaluate_predictions.php
  */
 
+ /*
+    TODO: this should become an invocable object and should be setup as a Task Schedule from
+    routes/console.php or as a withSchedule from bootstrap/app.php.
+    Also this should be converted to use Laravels DI framework.
+ */
+
 // Define mock interfaces needed for services, only if they don't exist
 if (!interface_exists('App\\Services\\Interfaces\\StockDataServiceInterface')) {
     eval('namespace App\\Services\\Interfaces; interface StockDataServiceInterface {}');

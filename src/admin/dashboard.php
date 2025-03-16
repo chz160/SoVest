@@ -5,6 +5,10 @@
  * System status dashboard for monitoring application health and performance
  */
 
+  /*
+    TODO: This should be refactored to to the Laravel framework and use the built in dashboard.
+ */
+
 session_start();
 
 // Include required files

@@ -5,6 +5,11 @@
  * This page shows the top-performing users on SoVest.
  */
 
+     /*
+        TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+    */
+
 session_start();
 
 // Check if user is logged in

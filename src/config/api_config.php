@@ -6,13 +6,12 @@
  * Updated to load API key from .env file instead of hardcoded value
  */
 
-// Include the database configuration to reuse .env loading functionality
-require_once dirname(__DIR__) . '/includes/db_config.php';
+ //TODO: this needs refactored and is probably not even needed.
 
 // Define API settings
 // Get API key from environment variable with error handling
 try {
-    define('ALPHA_VANTAGE_API_KEY', getEnvVar('ALPHA_VANTAGE_API_KEY', ''));
+    define('ALPHA_VANTAGE_API_KEY', env('ALPHA_VANTAGE_API_KEY', ''));
     
     // Validate API key is not empty
     if (ALPHA_VANTAGE_API_KEY === '') {

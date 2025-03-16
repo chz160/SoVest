@@ -5,6 +5,10 @@
  * This file tests the functionality of the ValidationService.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/services/ValidationService.php';
 require_once __DIR__ . '/app/Services/Interfaces/ValidationServiceInterface.php';

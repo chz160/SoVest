@@ -6,6 +6,10 @@
  * This script tests if the AuthController works correctly with dependency injection.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Define base path
 define('APP_BASE_PATH', __DIR__);
 

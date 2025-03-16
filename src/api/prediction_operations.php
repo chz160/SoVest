@@ -5,6 +5,10 @@
  * Handles CRUD operations for stock predictions using Eloquent ORM
  */
 
+ /*
+    TODO: This should be converted to the Laravel framework if not already.
+ */
+
 // Include Eloquent configuration
 require_once '../bootstrap/database.php';
 

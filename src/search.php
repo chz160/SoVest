@@ -1,4 +1,9 @@
 <?php
+        /*
+        TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+    */
+
     session_start();
     // Redirect to login if not authenticated
     if(!isset($_COOKIE["userID"])){

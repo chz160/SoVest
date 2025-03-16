@@ -44,7 +44,7 @@ To add validation to an Eloquent model:
 namespace Database\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Database\Models\Traits\ValidationTrait;
+use App\Models\Traits\ValidationTrait;
 
 class MyModel extends Model {
     use ValidationTrait;
@@ -71,7 +71,7 @@ class MyModel extends Model {
 namespace Database\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Database\Models\Traits\ValidationTrait;
+use App\Models\Traits\ValidationTrait;
 
 class User extends Model {
     use ValidationTrait;
@@ -133,7 +133,7 @@ class User extends Model {
 namespace Database\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Database\Models\Traits\ValidationTrait;
+use App\Models\Traits\ValidationTrait;
 
 class Stock extends Model {
     use ValidationTrait;
@@ -167,7 +167,7 @@ class Stock extends Model {
 namespace Database\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Database\Models\Traits\ValidationTrait;
+use App\Models\Traits\ValidationTrait;
 
 class Prediction extends Model {
     use ValidationTrait;

@@ -6,6 +6,10 @@
  * integration with the SearchController.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Set error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

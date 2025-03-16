@@ -5,6 +5,10 @@
  * Registers autoloading for classes to ensure tests work properly
  */
 
+ /*
+TODO: this can probably be deleted as Laraval shoudl handle autoloading
+*/
+
 // Register autoloader
 spl_autoload_register(function ($class) {
     // Convert namespace to directory structure

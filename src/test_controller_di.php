@@ -4,6 +4,10 @@
  * Test script for validating the enhanced Controller dependency injection
  */
 
+ /*
+TODO: this can probably be deleted as Laravel should handle all DI to controllers.
+*/
+
 // Required interfaces
 namespace App\Services\Interfaces {
     if (!interface_exists('AuthServiceInterface')) {

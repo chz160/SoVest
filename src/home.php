@@ -5,6 +5,11 @@
  * This is the main home page for authenticated users.
  */
 
+ /*
+ TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+ */
+
 // Start session
 session_start();
 

@@ -6,6 +6,10 @@
  * Updated to use Eloquent ORM for database operations
  */
 
+  /*
+    TODO: This should be converted to the Laravel framework if not already.
+ */
+
 // Include Eloquent ORM initialization
 require_once '../bootstrap/database.php';
 

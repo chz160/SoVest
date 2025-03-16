@@ -6,7 +6,7 @@
  */
 
 // Define the trait and model directly
-namespace Database\Models\Traits {
+namespace App\Models\Traits {
     trait ValidationTrait
     {
         // These will be defined in the class that uses this trait

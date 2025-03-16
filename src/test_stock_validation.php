@@ -1,5 +1,9 @@
 <?php
 
+/*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Initialize database and autoloader first
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/bootstrap/database.php';

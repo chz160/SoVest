@@ -6,6 +6,10 @@
  * maintain the same functionality as before.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Define application path
 define('APP_BASE_PATH', __DIR__);
 

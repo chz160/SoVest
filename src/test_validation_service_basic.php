@@ -5,6 +5,10 @@
  * This file tests the basic functionality of the ValidationService without dependencies.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Define interface
 interface ValidationServiceInterface {
     public function validateRequest(array $rules, array $data, array $customMessages = []);

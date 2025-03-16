@@ -3,6 +3,10 @@
  * Test script for ApiController
  */
 
+/*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Include necessary files for bootstrapping
 require_once 'app/bootstrap.php';
 

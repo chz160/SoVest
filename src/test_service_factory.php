@@ -5,6 +5,10 @@
  * This file tests the functionality of the ServiceFactory class.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // This is a special test implementation of the interface to avoid dependency issues
 namespace App\Services\Interfaces {
     interface AuthServiceInterface {}

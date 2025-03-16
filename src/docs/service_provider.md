@@ -1,5 +1,7 @@
 # ServiceProvider Implementation
 
+TODO: this needs to be rewritten as we are using the Laravel DI framework instead of a handrolled solition.
+
 ## Overview
 The ServiceProvider class enhances the PHP-DI container to manage service dependencies for controllers in the SoVest application. It provides a central access point for retrieving service instances and instantiating controllers with their dependencies.
 

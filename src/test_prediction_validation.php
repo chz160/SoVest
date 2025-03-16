@@ -6,6 +6,10 @@
  * implemented in the Prediction model
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Load autoloader first
 require_once __DIR__ . '/test_autoload.php';
 

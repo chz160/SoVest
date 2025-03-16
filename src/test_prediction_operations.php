@@ -4,6 +4,10 @@
  * Tests the key functionality of the updated create_prediction function
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Clean output buffer for test results
 ob_start();
 

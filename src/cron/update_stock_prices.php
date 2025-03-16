@@ -7,6 +7,12 @@
  * 0 * * * * php /path/to/SoVest/SoVest_code/cron/update_stock_prices.php
  */
 
+  /*
+    TODO: this should become an invocable object and should be setup as a Task Schedule from
+    routes/console.php or as a withSchedule from bootstrap/app.php.
+    Also this should be converted to use Laravels DI framework.
+ */
+
 // Include the StockDataService
 require_once __DIR__ . '/../services/StockDataService.php';
 require_once __DIR__ . '/../app/Services/ServiceFactory.php';

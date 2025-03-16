@@ -13,6 +13,10 @@
  * the application would need a complete test environment with database access.
  */
 
+ /*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 // Helper function to print test results
 function testResult($test, $result, $message = '') {
     echo $result ? "✓ PASS: $test" : "✗ FAIL: $test";

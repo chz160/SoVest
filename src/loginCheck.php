@@ -6,6 +6,11 @@
  * Uses Eloquent ORM for database operations.
  */
 
+     /*
+        TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+    */
+
 // Include Eloquent ORM setup and User model
 require_once 'bootstrap/database.php';
 require_once 'database/models/User.php';

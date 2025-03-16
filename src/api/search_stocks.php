@@ -5,6 +5,10 @@
  * This endpoint allows searching for stocks by symbol or name.
  */
 
+  /*
+    TODO: This should be converted to the Laravel framework if not already.
+ */
+
 // Include Eloquent configuration
 require_once '../bootstrap/database.php';
 

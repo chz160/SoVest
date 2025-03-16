@@ -6,6 +6,11 @@
  * Uses ServiceFactory for obtaining database service.
  */
 
+     /*
+        TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+    */
+
 // Include database configuration
 require_once 'includes/db_config.php';
 // Import ServiceFactory

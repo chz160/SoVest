@@ -4,6 +4,10 @@
  * 
  * Admin interface to manage tracked stocks
  */
+
+   /*
+    TODO: This should be refactored to to the Laravel framework instead of using raw PHP.
+ */
 session_start();
 
 // Include the StockDataService and ServiceFactory

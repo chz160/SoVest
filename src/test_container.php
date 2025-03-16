@@ -5,6 +5,10 @@
  * This file tests the PHP-DI container configuration.
  */
 
+ /*
+TODO: this can probably be deleted as Laravel should handle all the container stuff.
+*/
+
 // Define application path
 define('APP_BASE_PATH', __DIR__);
 

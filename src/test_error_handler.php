@@ -1,5 +1,9 @@
 <?php
 
+/*
+TODO: this test needs to be converted to a proper phpunit unit test and moved to correct folder under tests.
+*/
+
 require_once 'vendor/autoload.php';
 require_once 'app/Handlers/Interfaces/ErrorHandlerInterface.php';
 require_once 'app/Handlers/ErrorHandler.php';

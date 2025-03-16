@@ -1,3 +1,8 @@
+<!--
+TODO: We need to validate that this page has been fully converted to the Laravel
+framework controllers, views, and routes before we delete it.
+-->
+
 <!doctype html>
 <html lang="en" data-bs-theme="auto">
 	<head>

@@ -5,6 +5,11 @@
  * This file handles user logout using the Eloquent authentication system.
  */
 
+     /*
+        TODO: We need to validate that this page has been fully converted to the Laravel
+        framework controllers, views, and routes before we delete it.
+    */
+
 // Include the authentication functions
 require_once __DIR__ . '/includes/auth.php';
 
