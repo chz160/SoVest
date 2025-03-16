@@ -5,7 +5,7 @@ This document outlines the comprehensive testing plan for the SoVest application
 ## Test Environment Setup
 
 ### Local Development Environment
-- PHP 7.4+
+- PHP 8.4+
 - MySQL 5.7+
 - Web server (Apache/Nginx)
 - Sample database with test data

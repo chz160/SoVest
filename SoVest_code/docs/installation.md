@@ -4,7 +4,7 @@ This document outlines the steps required to set up the SoVest application on yo
 
 ## System Requirements
 
-- PHP 7.4 or higher
+- PHP 8.4 or higher
 - MySQL 5.7 or higher
 - Web server (Apache or Nginx)
 - SSL certificate for production environments
@@ -135,7 +135,7 @@ server {
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
     }
 

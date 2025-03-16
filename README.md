@@ -6,7 +6,7 @@ SoVest is a PHP-based web application for stock predictions that allows users to
 
 ## Technology Stack
 
-- **Backend**: PHP 7.4+
+- **Backend**: PHP 8.4+
 - **Database**: MySQL 5.7+
 - **ORM**: Laravel's Eloquent ORM (standalone implementation)
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap

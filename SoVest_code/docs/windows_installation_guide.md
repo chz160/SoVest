@@ -11,7 +11,7 @@ This guide provides comprehensive instructions for installing and configuring th
 
 ### Software Requirements
 - **Operating System**: Windows 10/11 (64-bit) or Windows Server 2016/2019/2022
-- **PHP**: Version 7.4 or higher
+- **PHP**: Version 8.4.x or higher
 - **MySQL**: Version 5.7 or higher
 - **NGINX**: Latest stable version
 - **Composer**: Latest version
@@ -25,7 +25,7 @@ This guide provides comprehensive instructions for installing and configuring th
 
 ### Download PHP
 1. Visit the PHP for Windows download page: https://windows.php.net/download/
-2. Download the **PHP 7.4+** (or newer) **x64 Non-Thread Safe** zip package
+2. Download the **PHP 8.4+** (or newer) **x64 Non-Thread Safe** zip package
    - The Non-Thread Safe version is recommended for use with NGINX
 
 ### Install PHP
@@ -37,16 +37,17 @@ This guide provides comprehensive instructions for installing and configuring th
 1. Open `php.ini` in a text editor
 2. Enable required extensions by removing the semicolon (`;`) from the beginning of these lines:
    ```ini
-   extension=curl
-   extension=fileinfo
-   extension=mbstring
-   extension=openssl
-   extension=pdo_mysql
-   extension=exif
+   extension=php_curl.dll
+   extension=php_fileinfo.dll
+   extension=php_mbstring.dll
+   extension=php_openssl.dll
+   extension=php_pdo_mysql.dll
+   extension=php_exif.dll
    ```
+   Note: If you have php located anywhere other than C:\php than you will need to use the full path to the files above.
 3. Set the timezone by locating and updating the following line:
    ```ini
-   date.timezone = "America/New_York"
+   date.timezone = "America/Chicago"
    ```
    Replace with your appropriate timezone from the [PHP timezone list](https://www.php.net/manual/en/timezones.php)
 
