@@ -1,12 +1,14 @@
 <?php
 
 /**
- * SoVest Routing System
+ * SoVest Application Routes
  * 
- * This file defines routes that map URLs to controller actions.
- * Routes can be defined in multiple formats:
+ * This file defines all routes for the SoVest application.
+ * Routes are organized in logical groups for better maintainability.
  * 
- * 1. Simple route (backward compatible):
+ * Route definition formats:
+ * 
+ * 1. Simple route:
  *    '/path' => ['controller' => 'ControllerName', 'action' => 'actionName']
  * 
  * 2. Advanced route with method constraints, middleware, and name:
@@ -34,15 +36,12 @@
  */
 
 return [
-    // ===================================
-    // Route groups with advanced features
-    // ===================================
-    
     // Authentication routes group
     [
         'type' => 'group',
         'name' => 'auth',
         'routes' => [
+            // Home page route - main entry point for the application
             '/' => [
                 'controller' => 'HomeController',
                 'action' => 'index',
@@ -200,43 +199,6 @@ return [
         ],
     ],
 
-    // API routes
-    [
-        'type' => 'group',
-        'prefix' => '/api',
-        'middleware' => ['api'], // API middleware for rate limiting, etc.
-        'name' => 'api',
-        'routes' => [
-            '/predictions' => [
-                'controller' => 'ApiController',
-                'action' => 'predictionOperations',
-                'method' => 'GET|POST',
-                'name' => 'api.predictions',
-            ],
-            '/search' => [
-                'controller' => 'ApiController',
-                'action' => 'search',
-                'method' => 'GET',
-                'name' => 'api.search',
-            ],
-            '/stocks' => [
-                'controller' => 'ApiController',
-                'action' => 'stocks',
-                'method' => 'GET',
-                'name' => 'api.stocks',
-            ],
-            '/stocks/:symbol' => [
-                'controller' => 'ApiController',
-                'action' => 'getStock',
-                'method' => 'GET',
-                'name' => 'api.stocks.get',
-                'params' => [
-                    'symbol' => ['type' => 'string', 'required' => true, 'pattern' => '^[A-Z]{1,5}$'],
-                ],
-            ],
-        ],
-    ],
-
     // Page routes
     [
         'type' => 'group',
@@ -257,12 +219,63 @@ return [
         ],
     ],
 
-    // Admin routes (example of nested groups with namespace)
+    // API routes
+    [
+        'type' => 'group',
+        'prefix' => '/api',
+        'middleware' => ['api'], // API middleware for rate limiting, etc.
+        'name' => 'api',
+        'routes' => [
+            '/predictions' => [
+                'controller' => 'ApiController',
+                'action' => 'predictionOperations',
+                'method' => 'GET|POST',
+                'name' => 'api.predictions',
+            ],
+            '/search' => [
+                'controller' => 'ApiController',
+                'action' => 'search',
+                'method' => 'GET',
+                'name' => 'api.search',
+            ],
+            '/search_stocks' => [
+                'controller' => 'ApiController',
+                'action' => 'searchStocks',
+                'method' => 'GET',
+                'name' => 'api.search_stocks',
+            ],
+            '/stocks' => [
+                'controller' => 'ApiController',
+                'action' => 'stocks',
+                'method' => 'GET',
+                'name' => 'api.stocks',
+            ],
+            '/stocks/:symbol' => [
+                'controller' => 'ApiController',
+                'action' => 'getStock',
+                'method' => 'GET',
+                'name' => 'api.stocks.get',
+                'params' => [
+                    'symbol' => ['type' => 'string', 'required' => true, 'pattern' => '^[A-Z]{1,5}$'],
+                ],
+            ],
+            '/stocks/:symbol/price' => [
+                'controller' => 'ApiController',
+                'action' => 'getStockPrice',
+                'method' => 'GET',
+                'name' => 'api.stocks.price',
+                'params' => [
+                    'symbol' => ['type' => 'string', 'required' => true, 'pattern' => '^[A-Z]{1,5}$'],
+                ],
+            ],
+        ],
+    ],
+
+    // Admin routes
     [
         'type' => 'group',
         'prefix' => '/admin',
         'middleware' => ['auth', 'admin'], // Require both auth and admin middleware
-        'namespace' => 'Admin', // Use controllers in the Admin namespace
         'name' => 'admin',
         'routes' => [
             '/' => [
@@ -289,38 +302,17 @@ return [
         ],
     ],
 
-    // ===================================
-    // Legacy route format (for backward compatibility)
-    // ===================================
-    '/' => ['controller' => 'HomeController', 'action' => 'index'],
-    '/login' => ['controller' => 'AuthController', 'action' => 'loginForm'],
-    '/login/submit' => ['controller' => 'AuthController', 'action' => 'login'],
-    '/register' => ['controller' => 'AuthController', 'action' => 'registerForm'],
-    '/register/submit' => ['controller' => 'AuthController', 'action' => 'register'],
-    '/logout' => ['controller' => 'AuthController', 'action' => 'logout'],
-    '/home' => ['controller' => 'HomeController', 'action' => 'home'],
-    '/account' => ['controller' => 'UserController', 'action' => 'account'],
-    '/predictions' => ['controller' => 'PredictionController', 'action' => 'index'],
-    '/predictions/create' => ['controller' => 'PredictionController', 'action' => 'create'],
-    '/predictions/store' => ['controller' => 'PredictionController', 'action' => 'store'],
-    '/predictions/edit/:id' => ['controller' => 'PredictionController', 'action' => 'edit'],
-    '/predictions/update/:id' => ['controller' => 'PredictionController', 'action' => 'update'],
-    '/predictions/delete/:id' => ['controller' => 'PredictionController', 'action' => 'delete'],
-    '/predictions/view/:id' => ['controller' => 'PredictionController', 'action' => 'view'],
-    '/predictions/vote/:id' => ['controller' => 'PredictionController', 'action' => 'vote'],
-    '/api/predictions' => ['controller' => 'ApiController', 'action' => 'predictionOperations'],
-    '/api/search' => ['controller' => 'ApiController', 'action' => 'search'],
-    '/api/stocks' => ['controller' => 'ApiController', 'action' => 'stocks'],
-    '/about' => ['controller' => 'PageController', 'action' => 'about'],
-    '/trending' => ['controller' => 'PredictionController', 'action' => 'trending'],
-    '/leaderboard' => ['controller' => 'UserController', 'action' => 'leaderboard'],
-    '/search' => ['controller' => 'SearchController', 'action' => 'index'],
-    '/create_prediction.php' => ['controller' => 'PredictionController', 'action' => 'create'],
-    '/trending.php' => ['controller' => 'PredictionController', 'action' => 'trending'],
-    '/my_predictions.php' => ['controller' => 'PredictionController', 'action' => 'index'],
-    
-    // Error handling routes
-    '404' => ['controller' => 'ErrorController', 'action' => 'notFound'],
-    '403' => ['controller' => 'ErrorController', 'action' => 'forbidden'],
-    '500' => ['controller' => 'ErrorController', 'action' => 'serverError'],
+    // Error Routes
+    '404' => [
+        'controller' => 'ErrorController', 
+        'action' => 'notFound'
+    ],
+    '403' => [
+        'controller' => 'ErrorController', 
+        'action' => 'forbidden'
+    ],
+    '500' => [
+        'controller' => 'ErrorController', 
+        'action' => 'serverError'
+    ],
 ];

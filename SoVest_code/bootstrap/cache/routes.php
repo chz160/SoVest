@@ -4,13 +4,13 @@
  * 
  * This file is auto-generated. Do not edit directly.
  * 
- * Generated: 2025-03-12 22:38:01
- * Source Last Modified: 2025-03-06 21:11:41
+ * Generated: 2025-03-15 20:16:37
+ * Source Last Modified: 2025-03-15 20:16:17
  */
 
 // Timestamp for cache validation
-$timestamp = 1741837081;
-$sourceLastModified = 1741317101;
+$timestamp = 1742087797;
+$sourceLastModified = 1742087777;
 $sourceFile = '/home/porchn/ra.aid/SoVest/SoVest_code/app/Routes/routes.php';
 
 // Precompiled routes for better performance
@@ -80,7 +80,14 @@ return [
             ]
         ],
         '_named_routes' => [
-
+            'legacy.login' => '/login.php',
+            'legacy.logout' => '/logout.php',
+            'legacy.home' => '/home.php',
+            'legacy.prediction.create' => '/create_prediction.php',
+            'legacy.prediction.trending' => '/trending.php',
+            'legacy.prediction.my' => '/my_predictions.php',
+            'legacy.account' => '/account.php',
+            'legacy.search' => '/search.php'
         ],
         '/home' => [
             'controller' => 'HomeController',
@@ -105,11 +112,12 @@ return [
         '/leaderboard' => [
             'controller' => 'UserController',
             'action' => 'leaderboard',
+            'name' => 'user.leaderboard',
+            'middleware' => [
+                'auth'
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'GET'
             ]
         ],
         '/predictions/' => [
@@ -123,11 +131,15 @@ return [
         '/predictions/view/:id' => [
             'controller' => 'PredictionController',
             'action' => 'view',
+            'name' => 'predictions.view',
+            'params' => [
+                'id' => [
+                    'type' => 'int',
+                    'required' => true
+                ]
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'GET'
             ]
         ],
         '/predictions/trending' => [
@@ -141,109 +153,94 @@ return [
         '/predictions/create' => [
             'controller' => 'PredictionController',
             'action' => 'create',
+            'name' => 'predictions.create',
+            'middleware' => [
+                'auth'
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'GET'
             ]
         ],
         '/predictions/store' => [
             'controller' => 'PredictionController',
             'action' => 'store',
+            'name' => 'predictions.store',
+            'middleware' => [
+                'auth'
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'POST'
             ]
         ],
         '/predictions/edit/:id' => [
             'controller' => 'PredictionController',
             'action' => 'edit',
+            'name' => 'predictions.edit',
+            'middleware' => [
+                'auth',
+                'prediction.owner'
+            ],
+            'params' => [
+                'id' => [
+                    'type' => 'int',
+                    'required' => true
+                ]
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'GET'
             ]
         ],
         '/predictions/update/:id' => [
             'controller' => 'PredictionController',
             'action' => 'update',
+            'name' => 'predictions.update',
+            'middleware' => [
+                'auth',
+                'prediction.owner'
+            ],
+            'params' => [
+                'id' => [
+                    'type' => 'int',
+                    'required' => true
+                ]
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'POST'
             ]
         ],
         '/predictions/delete/:id' => [
             'controller' => 'PredictionController',
             'action' => 'delete',
+            'name' => 'predictions.delete',
+            'middleware' => [
+                'auth',
+                'prediction.owner'
+            ],
+            'params' => [
+                'id' => [
+                    'type' => 'int',
+                    'required' => true
+                ]
+            ],
             'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
+                'POST'
             ]
         ],
         '/predictions/vote/:id' => [
             'controller' => 'PredictionController',
             'action' => 'vote',
-            'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
-            ]
-        ],
-        '/api/predictions' => [
-            'controller' => 'ApiController',
-            'action' => 'predictionOperations',
-            'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
-            ]
-        ],
-        '/api/search' => [
-            'controller' => 'ApiController',
-            'action' => 'search',
-            'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
-            ]
-        ],
-        '/api/stocks' => [
-            'controller' => 'ApiController',
-            'action' => 'stocks',
-            'methods' => [
-                'GET',
-                'POST',
-                'PUT',
-                'DELETE'
-            ]
-        ],
-        '/api/stocks/:symbol' => [
-            'controller' => 'ApiController',
-            'action' => 'getStock',
-            'name' => 'api.stocks.get',
+            'name' => 'predictions.vote',
             'params' => [
-                'symbol' => [
-                    'type' => 'string',
-                    'required' => true,
-                    'pattern' => '^[A-Z]{1,5}$'
+                'id' => [
+                    'type' => 'int',
+                    'required' => true
                 ]
             ],
             'middleware' => [
-                'api'
+                'auth'
             ],
             'methods' => [
-                'GET'
+                'POST'
             ]
         ],
         '/about' => [
@@ -266,8 +263,89 @@ return [
                 'DELETE'
             ]
         ],
+        '/api/predictions' => [
+            'controller' => 'ApiController',
+            'action' => 'predictionOperations',
+            'name' => 'api.predictions',
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET',
+                'POST'
+            ]
+        ],
+        '/api/search' => [
+            'controller' => 'ApiController',
+            'action' => 'search',
+            'name' => 'api.search',
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET'
+            ]
+        ],
+        '/api/search_stocks' => [
+            'controller' => 'ApiController',
+            'action' => 'searchStocks',
+            'name' => 'api.search_stocks',
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET'
+            ]
+        ],
+        '/api/stocks' => [
+            'controller' => 'ApiController',
+            'action' => 'stocks',
+            'name' => 'api.stocks',
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET'
+            ]
+        ],
+        '/api/stocks/:symbol' => [
+            'controller' => 'ApiController',
+            'action' => 'getStock',
+            'name' => 'api.stocks.get',
+            'params' => [
+                'symbol' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'pattern' => '^[A-Z]{1,5}$'
+                ]
+            ],
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET'
+            ]
+        ],
+        '/api/stocks/:symbol/price' => [
+            'controller' => 'ApiController',
+            'action' => 'getStockPrice',
+            'name' => 'api.stocks.price',
+            'params' => [
+                'symbol' => [
+                    'type' => 'string',
+                    'required' => true,
+                    'pattern' => '^[A-Z]{1,5}$'
+                ]
+            ],
+            'middleware' => [
+                'api'
+            ],
+            'methods' => [
+                'GET'
+            ]
+        ],
         '/admin/' => [
-            'controller' => 'AdminDashboardController',
+            'controller' => 'DashboardController',
             'action' => 'index',
             'name' => 'admin.dashboard',
             'middleware' => [
@@ -279,7 +357,7 @@ return [
             ]
         ],
         '/admin/users' => [
-            'controller' => 'AdminUserController',
+            'controller' => 'UserController',
             'action' => 'index',
             'name' => 'admin.users.index',
             'middleware' => [
@@ -291,7 +369,7 @@ return [
             ]
         ],
         '/admin/users/:id' => [
-            'controller' => 'AdminUserController',
+            'controller' => 'UserController',
             'action' => 'view',
             'name' => 'admin.users.view',
             'params' => [
@@ -308,9 +386,10 @@ return [
                 'GET'
             ]
         ],
-        '/predictions' => [
-            'controller' => 'PredictionController',
-            'action' => 'index',
+        '/login.php' => [
+            'controller' => 'AuthController',
+            'action' => 'loginForm',
+            'name' => 'legacy.login',
             'methods' => [
                 'GET',
                 'POST',
@@ -318,9 +397,21 @@ return [
                 'DELETE'
             ]
         ],
-        '/trending' => [
-            'controller' => 'PredictionController',
-            'action' => 'trending',
+        '/logout.php' => [
+            'controller' => 'AuthController',
+            'action' => 'logout',
+            'name' => 'legacy.logout',
+            'methods' => [
+                'GET',
+                'POST',
+                'PUT',
+                'DELETE'
+            ]
+        ],
+        '/home.php' => [
+            'controller' => 'HomeController',
+            'action' => 'home',
+            'name' => 'legacy.home',
             'methods' => [
                 'GET',
                 'POST',
@@ -331,6 +422,7 @@ return [
         '/create_prediction.php' => [
             'controller' => 'PredictionController',
             'action' => 'create',
+            'name' => 'legacy.prediction.create',
             'methods' => [
                 'GET',
                 'POST',
@@ -341,6 +433,7 @@ return [
         '/trending.php' => [
             'controller' => 'PredictionController',
             'action' => 'trending',
+            'name' => 'legacy.prediction.trending',
             'methods' => [
                 'GET',
                 'POST',
@@ -351,6 +444,49 @@ return [
         '/my_predictions.php' => [
             'controller' => 'PredictionController',
             'action' => 'index',
+            'name' => 'legacy.prediction.my',
+            'methods' => [
+                'GET',
+                'POST',
+                'PUT',
+                'DELETE'
+            ]
+        ],
+        '/account.php' => [
+            'controller' => 'UserController',
+            'action' => 'account',
+            'name' => 'legacy.account',
+            'methods' => [
+                'GET',
+                'POST',
+                'PUT',
+                'DELETE'
+            ]
+        ],
+        '/search.php' => [
+            'controller' => 'SearchController',
+            'action' => 'index',
+            'name' => 'legacy.search',
+            'methods' => [
+                'GET',
+                'POST',
+                'PUT',
+                'DELETE'
+            ]
+        ],
+        '/loginCheck.php' => [
+            'controller' => 'AuthController',
+            'action' => 'login',
+            'methods' => [
+                'GET',
+                'POST',
+                'PUT',
+                'DELETE'
+            ]
+        ],
+        '/accountCheck.php' => [
+            'controller' => 'UserController',
+            'action' => 'updateAccount',
             'methods' => [
                 'GET',
                 'POST',
