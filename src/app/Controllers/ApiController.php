@@ -17,8 +17,9 @@ use App\Services\ServiceFactory;
 /**
  * ApiController
  * 
- * Handles API endpoints for predictions, search, and stocks.
+ * Handles API endpoints for search and stocks.
  * Migrated from legacy API endpoints to use the Controller architecture.
+ * Delegates prediction operations to PredictionController to eliminate duplication.
  */
 class ApiController extends Controller
 {
@@ -66,231 +67,24 @@ class ApiController extends Controller
     
     /**
      * Handle CRUD operations for predictions
+     *
+     * Delegates to the PredictionController's apiHandler method to avoid code duplication.
+     * This method maintains backward compatibility while centralizing prediction-related
+     * functionality in the PredictionController.
      * 
      * @return void
      */
     public function predictionOperations()
     {
-        // Check authentication
-        if (!$this->isAuthenticated()) {
-            return $this->jsonError('User not logged in', [], 401);
-        }
+        // Create a PredictionController instance with the same service dependencies
+        $predictionController = new PredictionController(
+            $this->authService,
+            $this->stockService
+        );
         
-        $userID = $_COOKIE["userID"] ?? null;
-        
-        try {
-            // Verify user exists using Eloquent
-            $user = User::find($userID);
-            if (!$user) {
-                return $this->jsonError('User not found');
-            }
-        } catch (\Exception $e) {
-            return $this->jsonError('Database connection failed: ' . $e->getMessage());
-        }
-        
-        // Determine action
-        $action = $this->input('action', '');
-        
-        switch ($action) {
-            case 'create':
-                return $this->createPrediction($userID);
-                break;
-            case 'update':
-                return $this->updatePrediction($userID);
-                break;
-            case 'delete':
-                return $this->deletePrediction($userID);
-                break;
-            case 'get':
-                return $this->getPrediction($userID);
-                break;
-            default:
-                return $this->jsonError('Invalid action specified');
-        }
-    }
-    
-    /**
-     * Create a new prediction
-     * 
-     * @param int $userID User ID
-     * @return void
-     */
-    private function createPrediction($userID)
-    {
-        try {
-            // Create a new Prediction model instance
-            $prediction = new Prediction([
-                'user_id' => $userID,
-                'stock_id' => $this->input('stock_id'),
-                'prediction_type' => $this->input('prediction_type'),
-                'target_price' => $this->has('target_price') && !empty($this->input('target_price')) ? 
-                            (float) $this->input('target_price') : null,
-                'end_date' => $this->input('end_date'),
-                'reasoning' => $this->input('reasoning'),
-                'prediction_date' => date('Y-m-d H:i:s'),
-                'is_active' => 1,
-                'accuracy' => null
-            ]);
-            
-            // Use model validation
-            if ($prediction->validate()) {
-                // Validation passed, save the prediction
-                $prediction->save();
-                return $this->jsonSuccess("Prediction created successfully", ['prediction_id' => $prediction->prediction_id], 'my_predictions.php');
-            } else {
-                // Get validation errors and create an error message
-                $errors = $prediction->getErrors();
-                $errorMessage = "Validation failed: ";
-                
-                // Format errors for response
-                foreach ($errors as $field => $fieldErrors) {
-                    foreach ($fieldErrors as $error) {
-                        $errorMessage .= $error . " ";
-                    }
-                }
-                
-                return $this->jsonError(trim($errorMessage));
-            }
-        } catch (\Exception $e) {
-            return $this->jsonError("Error creating prediction: " . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Update an existing prediction
-     * 
-     * @param int $userID User ID
-     * @return void
-     */
-    private function updatePrediction($userID)
-    {
-        try {
-            // Validate required fields
-            if (!$this->has('prediction_id') || empty($this->input('prediction_id'))) {
-                return $this->jsonError("Missing prediction ID");
-            }
-            
-            $prediction_id = $this->input('prediction_id');
-            
-            // Check if prediction exists and belongs to user using Eloquent
-            $prediction = Prediction::where('prediction_id', $prediction_id)
-                                  ->where('user_id', $userID)
-                                  ->first();
-            
-            if (!$prediction) {
-                return $this->jsonError("Prediction not found or you don't have permission to edit it");
-            }
-            
-            // Check if prediction can be edited (is still active)
-            if (!$prediction->is_active) {
-                return $this->jsonError("Cannot edit inactive predictions");
-            }
-            
-            // Update prediction attributes
-            $prediction->prediction_type = $this->has('prediction_type') && !empty($this->input('prediction_type')) ? 
-                            $this->input('prediction_type') : $prediction->prediction_type;
-            
-            $prediction->target_price = $this->has('target_price') && $this->input('target_price') !== '' ? 
-                            (float) $this->input('target_price') : $prediction->target_price;
-            
-            $prediction->end_date = $this->has('end_date') && !empty($this->input('end_date')) ? 
-                        $this->input('end_date') : $prediction->end_date;
-            
-            $prediction->reasoning = $this->has('reasoning') && !empty($this->input('reasoning')) ? 
-                        $this->input('reasoning') : $prediction->reasoning;
-            
-            // Use model validation
-            if ($prediction->validate()) {
-                // Validation passed, save the prediction
-                $prediction->save();
-                return $this->jsonSuccess("Prediction updated successfully", [], 'my_predictions.php');
-            } else {
-                // Get validation errors and create an error message
-                $errors = $prediction->getErrors();
-                $errorMessage = "Validation failed: ";
-                
-                // Format errors for response
-                foreach ($errors as $field => $fieldErrors) {
-                    foreach ($fieldErrors as $error) {
-                        $errorMessage .= $error . " ";
-                    }
-                }
-                
-                return $this->jsonError(trim($errorMessage));
-            }
-        } catch (\Exception $e) {
-            return $this->jsonError("Error updating prediction: " . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Delete a prediction
-     * 
-     * @param int $userID User ID
-     * @return void
-     */
-    private function deletePrediction($userID)
-    {
-        try {
-            // Validate required fields
-            if (!$this->has('prediction_id') || empty($this->input('prediction_id'))) {
-                return $this->jsonError("Missing prediction ID");
-            }
-            
-            $prediction_id = $this->input('prediction_id');
-            
-            // Check if prediction exists and belongs to user using Eloquent
-            $prediction = Prediction::where('prediction_id', $prediction_id)
-                                  ->where('user_id', $userID)
-                                  ->first();
-            
-            if (!$prediction) {
-                return $this->jsonError("Prediction not found or you don't have permission to delete it");
-            }
-            
-            // Delete prediction using Eloquent
-            $prediction->delete();
-            
-            return $this->jsonSuccess("Prediction deleted successfully");
-        } catch (\Exception $e) {
-            return $this->jsonError("Error deleting prediction: " . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Get a single prediction
-     * 
-     * @param int $userID User ID
-     * @return void
-     */
-    private function getPrediction($userID)
-    {
-        try {
-            if (!isset($_GET['prediction_id']) || empty($_GET['prediction_id'])) {
-                return $this->jsonError("Missing prediction ID");
-            }
-            
-            $prediction_id = $_GET['prediction_id'];
-            
-            // Use Eloquent with eager loading to get prediction with related stock data
-            $prediction = Prediction::with('stock')
-                                  ->where('prediction_id', $prediction_id)
-                                  ->where('user_id', $userID)
-                                  ->first();
-            
-            if ($prediction) {
-                // Format data to match the old response structure
-                $predictionData = $prediction->toArray();
-                $predictionData['symbol'] = $prediction->stock->symbol;
-                $predictionData['company_name'] = $prediction->stock->company_name;
-                
-                return $this->jsonSuccess("Prediction retrieved successfully", $predictionData);
-            } else {
-                return $this->jsonError("Prediction not found or you don't have permission to view it");
-            }
-        } catch (\Exception $e) {
-            return $this->jsonError("Error retrieving prediction: " . $e->getMessage());
-        }
+        // Delegate handling to PredictionController's apiHandler method
+        // This centralizes prediction operation handling in a single place
+        $predictionController->apiHandler();
     }
     
     /**

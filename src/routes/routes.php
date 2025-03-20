@@ -227,10 +227,34 @@ return [
         'name' => 'api',
         'routes' => [
             '/predictions' => [
-                'controller' => 'ApiController',
-                'action' => 'predictionOperations',
+                'controller' => 'PredictionController',
+                'action' => 'apiHandler',
                 'method' => 'GET|POST',
                 'name' => 'api.predictions',
+            ],
+            '/predictions/create' => [
+                'controller' => 'PredictionController',
+                'action' => 'store',
+                'method' => 'POST',
+                'name' => 'api.predictions.create',
+            ],
+            '/predictions/update' => [
+                'controller' => 'PredictionController',
+                'action' => 'update',
+                'method' => 'POST',
+                'name' => 'api.predictions.update',
+            ],
+            '/predictions/delete' => [
+                'controller' => 'PredictionController',
+                'action' => 'delete',
+                'method' => 'POST',
+                'name' => 'api.predictions.delete',
+            ],
+            '/predictions/get' => [
+                'controller' => 'PredictionController',
+                'action' => 'apiGetPrediction',
+                'method' => 'GET',
+                'name' => 'api.predictions.get',
             ],
             '/search' => [
                 'controller' => 'ApiController',

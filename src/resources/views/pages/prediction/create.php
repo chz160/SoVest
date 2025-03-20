@@ -130,6 +130,12 @@ $pageJs = 'js/prediction/prediction.js';
 </div>
 
 <script>
+// Update API endpoint for prediction.js to use Laravel routes
+const apiEndpoints = {
+    searchStocks: '<?= sovest_route('api.search_stocks'); ?>',
+    deletePrediction: '<?= sovest_route('api.predictions.delete'); ?>'
+};
+
 // Additional date validation
 document.addEventListener('DOMContentLoaded', function() {
     const endDateInput = document.getElementById('end_date');

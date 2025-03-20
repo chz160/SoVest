@@ -8,9 +8,7 @@
  */
 
   /*
-    TODO: this should become an invocable object and should be setup as a Task Schedule from
-    routes/console.php or as a withSchedule from bootstrap/app.php.
-    Also this should be converted to use Laravels DI framework.
+    TODO: verify that this have already been converted to app/Tasks/update_stock_prices.php
  */
 
 // Include the StockDataService

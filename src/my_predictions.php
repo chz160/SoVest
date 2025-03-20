@@ -1,8 +1,9 @@
 <?php
-    /*
-        TODO: We need to validate that this page has been fully converted to the Laravel
-        framework controllers, views, and routes before we delete it.
-    */
+/*
+TODO: It seems like this pages might have been converted already. Analyze this code the the 
+    app folders Controllers, Services and make sure everything looks correct. Also check that the
+    views and routing at good to go.
+*/
 
     require_once 'bootstrap/database.php';
     require_once 'includes/db_config.php';

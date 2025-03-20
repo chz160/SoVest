@@ -121,7 +121,7 @@ function setupSearchSuggestions(inputElement, suggestionsContainer) {
  * Fetch search suggestions from the API
  */
 function fetchSuggestions(query, type, suggestionsContainer) {
-    fetch(`api/search.php?action=suggestions&query=${encodeURIComponent(query)}&type=${type}`)
+    fetch(`/api/search?action=suggestions&query=${encodeURIComponent(query)}&type=${type}`)
         .then(response => response.json())
         .then(data => {
             suggestionsContainer.innerHTML = '';
@@ -185,11 +185,11 @@ function fetchSuggestions(query, type, suggestionsContainer) {
  */
 function saveSearch(query, type) {
     const formData = new FormData();
-    formData.append('action', 'save_search');
     formData.append('query', query);
     formData.append('type', type);
+    formData.append('action', 'save_search');
     
-    fetch('api/search.php', {
+    fetch('/api/search', {
         method: 'POST',
         body: formData
     })
@@ -228,7 +228,7 @@ function clearSearchHistory() {
     const formData = new FormData();
     formData.append('action', 'clear_history');
     
-    fetch('api/search.php', {
+    fetch('/api/search', {
         method: 'POST',
         body: formData
     })
@@ -252,10 +252,10 @@ function clearSearchHistory() {
  */
 function removeSavedSearch(searchId, listItem) {
     const formData = new FormData();
-    formData.append('action', 'remove_saved');
     formData.append('search_id', searchId);
+    formData.append('action', 'remove_saved');
     
-    fetch('api/search.php', {
+    fetch('/api/search', {
         method: 'POST',
         body: formData
     })

@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Set timeout to prevent excessive API calls
             searchTimeout = setTimeout(function() {
-                // Call stock search API
-                fetch(`api/search_stocks.php?term=${encodeURIComponent(searchTerm)}`)
+                // Call stock search API using Laravel endpoint
+                fetch(`${apiEndpoints.searchStocks}?term=${encodeURIComponent(searchTerm)}`)
                     .then(response => response.json())
                     .then(data => {
                         stockSuggestions.innerHTML = '';
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     formData.append('prediction_id', predictionToDelete);
                     
                     // Send delete request
-                    fetch('api/prediction_operations.php', {
+                    fetch(apiEndpoints.deletePrediction, {
                         method: 'POST',
                         body: formData
                     })
@@ -184,8 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
         editButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const predictionId = this.getAttribute('data-id');
-                // Redirect to edit page
-                window.location.href = `create_prediction.php?edit=${predictionId}`;
+                // Redirect to edit page using Laravel route
+                window.location.href = `/predictions/edit/${predictionId}`;
             });
         });
     }

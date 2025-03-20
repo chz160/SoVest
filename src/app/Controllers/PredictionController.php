@@ -619,7 +619,17 @@ class PredictionController extends Controller
     }
     
     /**
-     * Handle API requests for backward compatibility
+     * Handle API requests for backward compatibility with the legacy prediction_operations.php API endpoint
+     * 
+     * This method provides a compatibility layer that maps legacy API operations to the appropriate
+     * controller methods. It maintains the same parameter structure and response format as the 
+     * original API to ensure existing client code continues to work during the transition to Laravel.
+     * 
+     * Supported actions:
+     * - create: Maps to store()
+     * - update: Maps to update()
+     * - delete: Maps to delete()
+     * - get: Maps to apiGetPrediction()
      */
     public function apiHandler()
     {
@@ -672,9 +682,13 @@ class PredictionController extends Controller
     /**
      * API method to get a single prediction
      * 
-     * Separated for backward compatibility with the old API structure
+     * Retrieves a prediction by ID and returns it in a standardized API format.
+     * Can be accessed both directly via API routes and through the legacy apiHandler method.
+     * 
+     * @param int $userId The ID of the user making the request
+     * @return void Outputs JSON response directly
      */
-    private function apiGetPrediction($userId)
+    public function apiGetPrediction($userId)
     {
         try {
             if (!$this->has('prediction_id') || empty($this->input('prediction_id'))) {

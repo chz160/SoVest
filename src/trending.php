@@ -6,8 +6,9 @@
  */
 
 /*
-TODO: We need to validate that this page has been fully converted to the Laravel
-framework controllers, views, and routes before we delete it.
+TODO: It seems like this pages might have been converted already. Analyze this code the the 
+    app/Controllers/PredictionController, and any app/Services look correct, Also check that the
+    views and routing at good to go.
 */
 
 // Start session
