@@ -3,3 +3,4 @@
 **/vendor/
 error_log
 logs/
+.phpunit.cache/
