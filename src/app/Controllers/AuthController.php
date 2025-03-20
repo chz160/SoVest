@@ -2,6 +2,10 @@
 
 namespace App\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+
 use Database\Models\User;
 use Exception;
 use App\Services\Interfaces\AuthServiceInterface;
@@ -44,7 +48,7 @@ class AuthController extends Controller
     {
         // If user is already logged in, redirect to home
         if ($this->isAuthenticated()) {
-            return $this->redirect('home.php');
+            return $this->redirect('home');
         }
         
         // Set page title
@@ -54,7 +58,7 @@ class AuthController extends Controller
         $success = $this->input('success');
         
         // Render the login view
-        $this->render('user/login', [
+        return view('pages/user/login', [
             'pageTitle' => $pageTitle,
             'success' => $success
         ]);
@@ -65,12 +69,12 @@ class AuthController extends Controller
      * 
      * @return void
      */
-    public function login()
+    public function login(Request $request): RedirectResponse
     {
         // Validate the input
-        $validation = $this->validateRequest([
-            'tryEmail' => 'required|email',
-            'tryPass' => 'required|min:6'
+        $credentials = $request->validate([
+            'tryEmail' => ['required', 'email'],
+            'tryPass' => ['required'],
         ]);
         
         if ($validation !== true) {
@@ -82,31 +86,15 @@ class AuthController extends Controller
             }
         }
         
-        // Extract the form data
-        $email = $this->input('tryEmail', '');
-        $password = $this->input('tryPass', '');
-        $rememberMe = $this->input('remember', false);
-        
         try {
-            // Attempt to login using AuthService
-            $result = $this->authService->login($email, $password, $rememberMe);
-            
-            // Handle the response based on the request type
-            if ($result) {
-                if ($this->isApiRequest()) {
-                    $this->jsonSuccess('Login successful', ['user' => $result], 'home.php');
-                } else {
-                    // Login successful, redirect to home
-                    return $this->redirect('home.php');
-                }
-            } else {
-                if ($this->isApiRequest()) {
-                    $this->jsonError('Invalid credentials');
-                } else {
-                    // Login failed, redirect to login page with error
-                    return $this->redirect('login.php', ['error' => 'invalid_credentials']);
-                }
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+     
+                return redirect()->intended('home');
             }
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
         } catch (Exception $e) {
             // Log the error
             error_log("Login error: " . $e->getMessage());
@@ -115,7 +103,7 @@ class AuthController extends Controller
                 $this->jsonError('System error occurred', [], 500);
             } else {
                 // Redirect to login page with a generic error
-                return $this->redirect('login.php', ['error' => 'system_error']);
+                return $this->redirect('login', ['error' => 'system_error']);
             }
         }
     }
@@ -239,17 +227,11 @@ class AuthController extends Controller
      * 
      * @return void
      */
-    public function logout()
+    public function logout(Request $request): RedirectResponse
     {
-        // Logout using AuthService
-        $this->authService->logout();
-        
-        // Handle based on request type
-        if ($this->isApiRequest()) {
-            $this->jsonSuccess('Logout successful');
-        } else {
-            // Redirect to index page
-            return $this->redirect('index.php');
-        }
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 }

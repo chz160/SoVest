@@ -1,19 +1,8 @@
-<?php
-/**
- * SoVest Landing Page
- * 
- * This view displays the landing page with login form for SoVest application.
- */
+@extends('layouts.app')
 
-// Use the app layout for this view
-$this->setLayout('app');
+@section('title', 'SoVest')
 
-// Set view variables
-$pageTitle = $pageTitle ?? 'SoVest';
-$pageHeader = $pageHeader ?? 'Welcome to SoVest';
-$pageSubheader = $pageSubheader ?? 'SoVest aims to bring stock tips to the people, through a fun and innovative platform.';
-?>
-
+@section('content')
 <div class="row row-cols-1 row-cols-md-1 mb-1 text-center">
     <div class="col">
         <div class="card mb-4 rounded-3 shadow-sm">
@@ -44,3 +33,4 @@ $pageSubheader = $pageSubheader ?? 'SoVest aims to bring stock tips to the peopl
         </div>
     </div>
 </div>
+@endsection

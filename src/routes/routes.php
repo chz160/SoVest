@@ -37,167 +37,167 @@
 
 return [
     // Authentication routes group
-    [
-        'type' => 'group',
-        'name' => 'auth',
-        'routes' => [
-            // Home page route - main entry point for the application
-            '/' => [
-                'controller' => 'HomeController',
-                'action' => 'index',
-                'method' => 'GET',
-                'name' => 'home',
-            ],
-            '/login' => [
-                'controller' => 'AuthController',
-                'action' => 'loginForm',
-                'method' => 'GET',
-                'name' => 'login.form',
-            ],
-            '/login/submit' => [
-                'controller' => 'AuthController',
-                'action' => 'login',
-                'method' => 'POST',
-                'name' => 'login.submit',
-            ],
-            '/register' => [
-                'controller' => 'AuthController',
-                'action' => 'registerForm',
-                'method' => 'GET',
-                'name' => 'register.form',
-            ],
-            '/register/submit' => [
-                'controller' => 'AuthController',
-                'action' => 'register',
-                'method' => 'POST',
-                'name' => 'register.submit',
-            ],
-            '/logout' => [
-                'controller' => 'AuthController',
-                'action' => 'logout',
-                'method' => 'GET',
-                'name' => 'logout',
-                'middleware' => ['auth'], // Require authentication to logout
-            ],
-        ],
-    ],
+    // [
+    //     'type' => 'group',
+    //     'name' => 'auth',
+    //     'routes' => [
+    //         // Home page route - main entry point for the application
+    //         '/' => [
+    //             'controller' => 'HomeController',
+    //             'action' => 'index',
+    //             'method' => 'GET',
+    //             'name' => 'home',
+    //         ],
+    //         '/login' => [
+    //             'controller' => 'AuthController',
+    //             'action' => 'loginForm',
+    //             'method' => 'GET',
+    //             'name' => 'login.form',
+    //         ],
+    //         '/login/submit' => [
+    //             'controller' => 'AuthController',
+    //             'action' => 'login',
+    //             'method' => 'POST',
+    //             'name' => 'login.submit',
+    //         ],
+    //         '/register' => [
+    //             'controller' => 'AuthController',
+    //             'action' => 'registerForm',
+    //             'method' => 'GET',
+    //             'name' => 'register.form',
+    //         ],
+    //         '/register/submit' => [
+    //             'controller' => 'AuthController',
+    //             'action' => 'register',
+    //             'method' => 'POST',
+    //             'name' => 'register.submit',
+    //         ],
+    //         '/logout' => [
+    //             'controller' => 'AuthController',
+    //             'action' => 'logout',
+    //             'method' => 'GET',
+    //             'name' => 'logout',
+    //             'middleware' => ['auth'], // Require authentication to logout
+    //         ],
+    //     ],
+    // ],
 
-    // User routes group
-    [
-        'type' => 'group',
-        'name' => 'user',
-        'middleware' => ['auth'], // All user routes require authentication
-        'routes' => [
-            '/home' => [
-                'controller' => 'HomeController',
-                'action' => 'home',
-                'method' => 'GET',
-                'name' => 'user.home',
-            ],
-            '/account' => [
-                'controller' => 'UserController',
-                'action' => 'account',
-                'method' => 'GET',
-                'name' => 'user.account',
-            ],
-            '/leaderboard' => [
-                'controller' => 'UserController',
-                'action' => 'leaderboard',
-                'method' => 'GET',
-                'name' => 'user.leaderboard',
-            ],
-        ],
-    ],
+    // // User routes group
+    // [
+    //     'type' => 'group',
+    //     'name' => 'user',
+    //     'middleware' => ['auth'], // All user routes require authentication
+    //     'routes' => [
+    //         '/home' => [
+    //             'controller' => 'HomeController',
+    //             'action' => 'home',
+    //             'method' => 'GET',
+    //             'name' => 'user.home',
+    //         ],
+    //         '/account' => [
+    //             'controller' => 'UserController',
+    //             'action' => 'account',
+    //             'method' => 'GET',
+    //             'name' => 'user.account',
+    //         ],
+    //         '/leaderboard' => [
+    //             'controller' => 'UserController',
+    //             'action' => 'leaderboard',
+    //             'method' => 'GET',
+    //             'name' => 'user.leaderboard',
+    //         ],
+    //     ],
+    // ],
 
-    // Prediction routes group
-    [
-        'type' => 'group',
-        'prefix' => '/predictions',
-        'name' => 'predictions',
-        'routes' => [
-            // Public prediction routes
-            '/' => [
-                'controller' => 'PredictionController',
-                'action' => 'index',
-                'method' => 'GET',
-                'name' => 'predictions.index',
-            ],
-            '/view/:id' => [
-                'controller' => 'PredictionController',
-                'action' => 'view',
-                'method' => 'GET',
-                'name' => 'predictions.view',
-                'params' => [
-                    'id' => ['type' => 'int', 'required' => true],
-                ],
-            ],
-            '/trending' => [
-                'controller' => 'PredictionController',
-                'action' => 'trending',
-                'method' => 'GET',
-                'name' => 'predictions.trending',
-            ],
+    // // Prediction routes group
+    // [
+    //     'type' => 'group',
+    //     'prefix' => '/predictions',
+    //     'name' => 'predictions',
+    //     'routes' => [
+    //         // Public prediction routes
+    //         '/' => [
+    //             'controller' => 'PredictionController',
+    //             'action' => 'index',
+    //             'method' => 'GET',
+    //             'name' => 'predictions.index',
+    //         ],
+    //         '/view/:id' => [
+    //             'controller' => 'PredictionController',
+    //             'action' => 'view',
+    //             'method' => 'GET',
+    //             'name' => 'predictions.view',
+    //             'params' => [
+    //                 'id' => ['type' => 'int', 'required' => true],
+    //             ],
+    //         ],
+    //         '/trending' => [
+    //             'controller' => 'PredictionController',
+    //             'action' => 'trending',
+    //             'method' => 'GET',
+    //             'name' => 'predictions.trending',
+    //         ],
 
-            // Authenticated prediction routes
-            [
-                'type' => 'group',
-                'middleware' => ['auth'],
-                'routes' => [
-                    '/create' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'create',
-                        'method' => 'GET',
-                        'name' => 'predictions.create',
-                    ],
-                    '/store' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'store',
-                        'method' => 'POST',
-                        'name' => 'predictions.store',
-                    ],
-                    '/edit/:id' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'edit',
-                        'method' => 'GET',
-                        'name' => 'predictions.edit',
-                        'middleware' => ['prediction.owner'], // Ensure user owns the prediction
-                        'params' => [
-                            'id' => ['type' => 'int', 'required' => true],
-                        ],
-                    ],
-                    '/update/:id' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'update',
-                        'method' => 'POST',
-                        'name' => 'predictions.update',
-                        'middleware' => ['prediction.owner'], // Ensure user owns the prediction
-                        'params' => [
-                            'id' => ['type' => 'int', 'required' => true],
-                        ],
-                    ],
-                    '/delete/:id' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'delete',
-                        'method' => 'POST',
-                        'name' => 'predictions.delete',
-                        'middleware' => ['prediction.owner'], // Ensure user owns the prediction
-                        'params' => [
-                            'id' => ['type' => 'int', 'required' => true],
-                        ],
-                    ],
-                    '/vote/:id' => [
-                        'controller' => 'PredictionController',
-                        'action' => 'vote',
-                        'method' => 'POST',
-                        'name' => 'predictions.vote',
-                        'params' => [
-                            'id' => ['type' => 'int', 'required' => true],
-                        ],
-                    ],
-                ],
-            ],
-        ],
-    ],
+    //         // Authenticated prediction routes
+    //         [
+    //             'type' => 'group',
+    //             'middleware' => ['auth'],
+    //             'routes' => [
+    //                 '/create' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'create',
+    //                     'method' => 'GET',
+    //                     'name' => 'predictions.create',
+    //                 ],
+    //                 '/store' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'store',
+    //                     'method' => 'POST',
+    //                     'name' => 'predictions.store',
+    //                 ],
+    //                 '/edit/:id' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'edit',
+    //                     'method' => 'GET',
+    //                     'name' => 'predictions.edit',
+    //                     'middleware' => ['prediction.owner'], // Ensure user owns the prediction
+    //                     'params' => [
+    //                         'id' => ['type' => 'int', 'required' => true],
+    //                     ],
+    //                 ],
+    //                 '/update/:id' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'update',
+    //                     'method' => 'POST',
+    //                     'name' => 'predictions.update',
+    //                     'middleware' => ['prediction.owner'], // Ensure user owns the prediction
+    //                     'params' => [
+    //                         'id' => ['type' => 'int', 'required' => true],
+    //                     ],
+    //                 ],
+    //                 '/delete/:id' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'delete',
+    //                     'method' => 'POST',
+    //                     'name' => 'predictions.delete',
+    //                     'middleware' => ['prediction.owner'], // Ensure user owns the prediction
+    //                     'params' => [
+    //                         'id' => ['type' => 'int', 'required' => true],
+    //                     ],
+    //                 ],
+    //                 '/vote/:id' => [
+    //                     'controller' => 'PredictionController',
+    //                     'action' => 'vote',
+    //                     'method' => 'POST',
+    //                     'name' => 'predictions.vote',
+    //                     'params' => [
+    //                         'id' => ['type' => 'int', 'required' => true],
+    //                     ],
+    //                 ],
+    //             ],
+    //         ],
+    //     ],
+    // ],
 
     // Page routes
     [

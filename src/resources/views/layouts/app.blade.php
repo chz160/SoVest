@@ -3,17 +3,19 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= $pageTitle ?? 'SoVest' ?></title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">   
+    <title>@yield('title', $pageTitle ?? 'SoVest')</title>
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">   
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-    <link rel="manifest" href="/images/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('images/site.webmanifest') }}">
     
-    <?php if (isset($pageCss)): ?>
-    <link href="/<?= $pageCss ?>" rel="stylesheet">
-    <?php endif; ?>
+    @if (isset($pageCss))
+    <link href="{{ asset($pageCss) }}" rel="stylesheet">
+    @endif
+
+    @yield('styles')
 </head>
 <body>
     <div class="container py-3">
@@ -24,45 +26,49 @@
                 </a>
 
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                    <?php if (isset($user)): ?>
+                    @if (isset($user))
                     <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/home">Home</a>
                     <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/account">My Account</a>
                     <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/logout">Logout</a>
-                    <?php else: ?>
+                    @else
                     <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/home">Home</a>
                     <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/about">About SoVest</a>
-                    <?php endif; ?>
+                    @endif
                 </nav>
             </div>
             
-            <?php if (!empty($pageHeader)): ?>
+            @if (!empty($pageHeader))
             <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-                <h1 class="display-4 fw-normal"><?= $pageHeader ?></h1>
-                <?php if (!empty($pageSubheader)): ?>
-                <p class="fs-5 text-body-secondary"><?= $pageSubheader ?></p>
-                <?php endif; ?>
+                <h1 class="display-4 fw-normal">{{ $pageHeader }}</h1>
+                @if (!empty($pageSubheader))
+                <p class="fs-5 text-body-secondary">{{ $pageSubheader }}</p>
+                @endif
             </div>
-            <?php endif; ?>
+            @endif
         </header>
 
         <main>
-            <?php if (!empty($errors)): ?>
+            @if (!empty($errors))
                 <div class="alert alert-danger">
                     <ul class="mb-0">
-                        <?php foreach ($errors as $error): ?>
-                            <li><?= $error ?></li>
-                        <?php endforeach; ?>
+                        @foreach ($errors as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
                     </ul>
                 </div>
-            <?php endif; ?>
+            @endif
             
-            <?php if (!empty($success) && !empty($message)): ?>
+            @if (!empty($success) && !empty($message))
                 <div class="alert alert-success">
-                    <?= $message ?>
+                    {{ $message }}
                 </div>
-            <?php endif; ?>
+            @endif
             
-            <?= $content ?? '' ?>
+            @hasSection('content')
+                @yield('content')
+            @else
+                {!! $content ?? '' !!}
+            @endif
         </main>
 
         <footer class="pt-4 my-md-5 pt-md-5 border-top">
@@ -74,9 +80,11 @@
         </footer>
     </div>
     
-    <script src="/js/bootstrap.bundle.min.js"></script>
-    <?php if (isset($pageJs)): ?>
-    <script src="/<?= $pageJs ?>"></script>
-    <?php endif; ?>
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    @if (isset($pageJs))
+    <script src="{{ asset($pageJs) }}"></script>
+    @endif
+
+    @yield('scripts')
 </body>
 </html>

@@ -19,7 +19,7 @@ class HomeController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
     }
     
     /**
@@ -46,7 +46,8 @@ class HomeController extends Controller
         ];
         
         // Display the landing page with data
-        $this->render('index', $data);
+        //$this->render('index', $data);
+        return view('index');
     }
     
     /**
@@ -66,7 +67,7 @@ class HomeController extends Controller
         $pageTitle = 'Home';
         
         // Render the home view
-        $this->render('home', [
+        return view('home', [
             'user' => $user,
             'pageTitle' => $pageTitle
         ]);
@@ -83,7 +84,7 @@ class HomeController extends Controller
         $pageTitle = 'About SoVest';
         
         // Render the about view
-        $this->render('about', [
+        return view('about', [
             'pageTitle' => $pageTitle
         ]);
     }
