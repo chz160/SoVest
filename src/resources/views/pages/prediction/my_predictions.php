@@ -1,45 +1,44 @@
-<?php
-// Set the title and include CSS/JS for the layout
-$pageTitle = $pageTitle ?? 'My Predictions';
-$pageCss = '<link rel="stylesheet" href="/css/prediction.css">';
-$pageJs = '<script src="/js/prediction/prediction.js"></script>';
+@extends('layouts.app')
 
-// Start capturing the content
-ob_start();
-?>
+@section('title', $pageTitle ?? 'My Predictions')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/prediction.css') }}">
+@endsection
+
+@section('content')
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-6"><?php echo htmlspecialchars($pageTitle); ?></h1>
-        <a href="<?php echo sovest_route('predictions.create'); ?>" class="btn btn-primary">Create New Prediction</a>
+        <h1 class="display-6">{{ $pageTitle ?? 'My Predictions' }}</h1>
+        <a href="{{ route('predictions.create') }}" class="btn btn-primary">Create New Prediction</a>
     </div>
 
-    <?php if (empty($predictions)): ?>
+    @if(empty($predictions))
         <div class="empty-state prediction-card">
             <h4>No predictions yet</h4>
             <p>You haven't made any stock predictions yet. Create your first prediction to start building your reputation!</p>
-            <a href="<?php echo sovest_route('predictions.create'); ?>" class="btn btn-primary mt-3">Create Your First Prediction</a>
+            <a href="{{ route('predictions.create') }}" class="btn btn-primary mt-3">Create Your First Prediction</a>
         </div>
-    <?php else: ?>
-        <?php foreach ($predictions as $prediction): ?>
+    @else
+        @foreach($predictions as $prediction)
             <div class="prediction-card">
                 <div class="prediction-header">
-                    <h4><?php echo htmlspecialchars($prediction['symbol']); ?> - <?php echo htmlspecialchars($prediction['company_name']); ?></h4>
-                    <span class="badge <?php echo $prediction['prediction_type'] == 'Bullish' ? 'bg-success' : 'bg-danger'; ?>">
-                        <?php echo htmlspecialchars($prediction['prediction_type']); ?>
+                    <h4>{{ $prediction['symbol'] }} - {{ $prediction['company_name'] }}</h4>
+                    <span class="badge {{ $prediction['prediction_type'] == 'Bullish' ? 'bg-success' : 'bg-danger' }}">
+                        {{ $prediction['prediction_type'] }}
                     </span>
                 </div>
                 <div class="prediction-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Created:</strong> <?php echo date('M j, Y', strtotime($prediction['prediction_date'])); ?></p>
-                            <p><strong>End Date:</strong> <?php echo date('M j, Y', strtotime($prediction['end_date'])); ?></p>
-                            <?php if (!empty($prediction['target_price'])): ?>
-                                <p><strong>Target Price:</strong> $<?php echo htmlspecialchars(number_format($prediction['target_price'], 2)); ?></p>
-                            <?php endif; ?>
+                            <p><strong>Created:</strong> {{ date('M j, Y', strtotime($prediction['prediction_date'])) }}</p>
+                            <p><strong>End Date:</strong> {{ date('M j, Y', strtotime($prediction['end_date'])) }}</p>
+                            @if(!empty($prediction['target_price']))
+                                <p><strong>Target Price:</strong> ${{ number_format($prediction['target_price'], 2) }}</p>
+                            @endif
                         </div>
                         <div class="col-md-6">
-                            <?php 
+                            @php
                             $statusClass = 'bg-secondary';
                             $statusText = 'Inactive';
                             
@@ -52,37 +51,37 @@ ob_start();
                                     $statusText = 'Expired';
                                 }
                             }
-                            ?>
+                            @endphp
                             <p>
-                                <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                                <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
                             </p>
-                            <p><strong>Upvotes:</strong> <?php echo isset($prediction['votes']) ? $prediction['votes'] : 0; ?></p>
-                            <?php if (isset($prediction['accuracy']) && $prediction['accuracy'] !== null): ?>
-                                <p><strong>Accuracy:</strong> <?php echo htmlspecialchars(number_format($prediction['accuracy'], 2)); ?>%</p>
-                            <?php endif; ?>
+                            <p><strong>Upvotes:</strong> {{ isset($prediction['votes']) ? $prediction['votes'] : 0 }}</p>
+                            @if(isset($prediction['accuracy']) && $prediction['accuracy'] !== null)
+                                <p><strong>Accuracy:</strong> {{ number_format($prediction['accuracy'], 2) }}%</p>
+                            @endif
                         </div>
                     </div>
                     
-                    <?php if (!empty($prediction['reasoning'])): ?>
+                    @if(!empty($prediction['reasoning']))
                         <div class="reasoning mt-3">
                             <h5>Reasoning:</h5>
-                            <p><?php echo htmlspecialchars($prediction['reasoning']); ?></p>
+                            <p>{{ $prediction['reasoning'] }}</p>
                         </div>
-                    <?php endif; ?>
+                    @endif
                     
-                    <?php if ($prediction['is_active'] == 1 && strtotime($prediction['end_date']) > time()): ?>
+                    @if($prediction['is_active'] == 1 && strtotime($prediction['end_date']) > time())
                         <div class="action-buttons mt-3">
-                            <a href="<?php echo sovest_route('predictions.edit', ['id' => $prediction['prediction_id']]); ?>" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ route('predictions.edit', ['id' => $prediction['prediction_id']]) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <button class="btn btn-sm btn-outline-danger delete-prediction" 
-                                   data-id="<?php echo $prediction['prediction_id']; ?>" 
+                                   data-id="{{ $prediction['prediction_id'] }}" 
                                    data-bs-toggle="modal" 
                                    data-bs-target="#deleteModal">Delete</button>
                         </div>
-                    <?php endif; ?>
+                    @endif
                 </div>
             </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+        @endforeach
+    @endif
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -103,16 +102,15 @@ ob_start();
         </div>
     </div>
 </div>
+@endsection
 
+@section('scripts')
+<script src="{{ asset('js/prediction/prediction.js') }}"></script>
 <script>
 // Update API endpoint for prediction.js to use Laravel routes
 const apiEndpoints = {
-    deletePrediction: '<?php echo sovest_route('api.predictions.delete'); ?>',
-    searchStocks: '<?php echo sovest_route('api.search_stocks'); ?>'
+    deletePrediction: '{{ route('api.predictions.delete') }}',
+    searchStocks: '{{ route('api.search_stocks') }}'
 };
 </script>
-
-<?php
-$content = ob_get_clean();
-include __DIR__ . '/layouts/app.php';
-?>
+@endsection
