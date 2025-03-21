@@ -3,51 +3,37 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="SoVest - Social Stock Predictions Platform">
     <title>@yield('title', $pageTitle ?? 'SoVest')</title>
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">   
-
+    
+    <!-- Bootstrap CSS -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    
+    <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ asset('images/site.webmanifest') }}">
     
+    <!-- Page-specific CSS -->
     @if (isset($pageCss))
     <link href="{{ asset($pageCss) }}" rel="stylesheet">
     @endif
 
+    <!-- Yield and stack for styles -->
     @yield('styles')
+    @stack('styles')
 </head>
 <body>
     <div class="container py-3">
-        <header>
-            <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-                <a href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none">
-                    <span class="fs-4">SoVest</span>
-                </a>
-
-                <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                    @if (isset($user))
-                    <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/home">Home</a>
-                    <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/account">My Account</a>
-                    <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/logout">Logout</a>
-                    @else
-                    <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/home">Home</a>
-                    <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="/about">About SoVest</a>
-                    @endif
-                </nav>
-            </div>
-            
-            @if (!empty($pageHeader))
-            <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-                <h1 class="display-4 fw-normal">{{ $pageHeader }}</h1>
-                @if (!empty($pageSubheader))
-                <p class="fs-5 text-body-secondary">{{ $pageSubheader }}</p>
-                @endif
-            </div>
-            @endif
-        </header>
-
+        <!-- Header partial -->
+        @include('partials.header')
+        
         <main>
+            <!-- Search bar partial -->
+            @include('partials.search-bar')
+            
+            <!-- Error and success messages -->
             @if (!empty($errors))
                 <div class="alert alert-danger">
                     <ul class="mb-0">
@@ -64,6 +50,7 @@
                 </div>
             @endif
             
+            <!-- Main content area with backward compatibility -->
             @hasSection('content')
                 @yield('content')
             @else
@@ -71,20 +58,20 @@
             @endif
         </main>
 
-        <footer class="pt-4 my-md-5 pt-md-5 border-top">
-            <div class="row">
-                <div class="col-12 col-md">
-                    <small class="d-block mb-3 text-body-secondary">Created by Nate Pedigo, Nelson Hayslett</small>
-                </div>
-            </div>
-        </footer>
+        <!-- Footer partial -->
+        @include('partials.footer')
     </div>
     
+    <!-- Bootstrap JavaScript -->
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    
+    <!-- Page-specific JavaScript -->
     @if (isset($pageJs))
     <script src="{{ asset($pageJs) }}"></script>
     @endif
 
+    <!-- Yield and stack for scripts -->
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
