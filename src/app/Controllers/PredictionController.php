@@ -33,7 +33,7 @@ class PredictionController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, StockDataServiceInterface $stockService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
         
         // Initialize stock service with dependency injection
         $this->stockService = $stockService;

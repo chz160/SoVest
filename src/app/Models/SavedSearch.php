@@ -3,27 +3,81 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class SavedSearch extends Model {
-    // Table name
+/**
+ * SavedSearch Model
+ * 
+ * Represents a saved search query stored by a user.
+ * 
+ * @property int $id
+ * @property int $user_id
+ * @property string $search_query
+ * @property string $search_type
+ * @property \Illuminate\Support\Carbon $created_at
+ */
+class SavedSearch extends Model 
+{
+    use HasFactory;
+    
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'saved_searches';
 
-    // Primary key
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
     protected $primaryKey = 'id';
 
-    // Only has created_at, not updated_at
+    /**
+     * Only has created_at, not updated_at
+     * 
+     * @var string
+     */
     const CREATED_AT = 'created_at';
+    
+    /**
+     * Disable updated_at timestamp
+     * 
+     * @var null
+     */
     const UPDATED_AT = null;
 
-    // Allow mass assignment for these columns
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'user_id',
         'search_query',
         'search_type'
     ];
+    
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
 
-    // Relationships
-    public function user()
+    /**
+     * Get the user that owns this saved search.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

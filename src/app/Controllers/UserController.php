@@ -30,7 +30,7 @@ class UserController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, PredictionScoringServiceInterface $scoringService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
         
         // Initialize scoring service with dependency injection
         $this->scoringService = $scoringService;

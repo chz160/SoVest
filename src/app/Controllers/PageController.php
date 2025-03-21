@@ -22,7 +22,7 @@ class PageController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
         
         // Fallback to ServiceFactory for backward compatibility
         if ($this->authService === null) {

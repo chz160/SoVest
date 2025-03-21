@@ -422,4 +422,27 @@ class ApiController extends Controller
             ]);
         }
     }
+    
+    /**
+     * Test API configuration values
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function testApiConfig()
+    {
+        $config = [
+            'ALPHA_VANTAGE_API_KEY' => config('api_config.ALPHA_VANTAGE_API_KEY'),
+            'ALPHA_VANTAGE_BASE_URL' => config('api_config.ALPHA_VANTAGE_BASE_URL'),
+            'API_RATE_LIMIT' => config('api_config.API_RATE_LIMIT'),
+            'STOCK_API_LOG_FILE' => config('api_config.STOCK_API_LOG_FILE'),
+            'STOCK_UPDATE_INTERVAL' => config('api_config.STOCK_UPDATE_INTERVAL'),
+            'DEFAULT_STOCKS' => config('api_config.DEFAULT_STOCKS'),
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'API configuration values',
+            'data' => $config
+        ]);
+    }
 }

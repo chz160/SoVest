@@ -35,7 +35,7 @@ class SearchController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, SearchServiceInterface $searchService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
         
         // Initialize search service with dependency injection
         $this->searchService = $searchService;

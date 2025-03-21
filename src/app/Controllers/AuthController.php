@@ -4,9 +4,10 @@ namespace App\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-
-use Database\Models\User;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Exception;
 use App\Services\Interfaces\AuthServiceInterface;
 use App\Services\ServiceFactory;
@@ -31,7 +32,7 @@ class AuthController extends Controller
      */
     public function __construct(AuthServiceInterface $authService = null, array $services = [])
     {
-        parent::__construct($authService, $services);
+        parent::__construct($authService, null, $services);
         
         // Fallback to ServiceFactory for backward compatibility
         if ($this->authService === null) {
@@ -113,21 +114,27 @@ class AuthController extends Controller
      * 
      * @return void
      */
-    public function registerForm()
+    /**
+     * Display registration form
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function registerForm(Request $request)
     {
         // If user is already logged in, redirect to home
-        if ($this->isAuthenticated()) {
-            return $this->redirect('home.php');
+        if (Auth::check()) {
+            return redirect()->route('user.home');
         }
         
         // Set page title
         $pageTitle = 'Create Account';
         
         // Get error message if any
-        $error = $this->input('error');
+        $error = $request->input('error');
         
-        // Render the registration view
-        $this->render('user/register', [
+        // Return the registration view
+        return view('pages.user.register', [
             'pageTitle' => $pageTitle,
             'error' => $error
         ]);
@@ -136,89 +143,60 @@ class AuthController extends Controller
     /**
      * Handle registration form submission
      * 
-     * @return void
+     * @param Request $request
+     * @return RedirectResponse|JsonResponse
      */
-    public function register()
+    public function register(Request $request)
     {
-        // Validate the input
-        $validation = $this->validateRequest([
-            'newEmail' => 'required|email',
-            'newPass' => 'required|min:8',
-            'newMajor' => 'required',
-            'newYear' => 'required',
-            'newScholarship' => 'required'
+        // Validate the input with Laravel's validation system
+        $validated = $request->validate([
+            'newEmail' => ['required', 'email', 'unique:users,email'],
+            'newPass' => ['required', 'min:8'],
+            'newMajor' => ['required'],
+            'newYear' => ['required'],
+            'newScholarship' => ['required']
         ]);
         
-        if ($validation !== true) {
-            if ($this->isApiRequest()) {
-                $this->jsonError('Registration validation failed', $validation);
-                return;
-            }
-            
-            // For backward compatibility, convert validation errors to simple error codes
-            if (isset($validation['newEmail'])) {
-                return $this->redirect('/register', ['error' => 'invalid_email']);
-            } else if (isset($validation['newPass'])) {
-                return $this->redirect('/register', ['error' => 'password_too_short']);
-            } else {
-                return $this->redirect('/register', ['error' => 'validation_failed']);
-            }
-        }
-        
-        // Extract the form data
-        $userData = [
-            'email' => $this->input('newEmail', ''),
-            'password' => $this->input('newPass', ''),
-            'major' => $this->input('newMajor', ''),
-            'year' => $this->input('newYear', ''),
-            'scholarship' => $this->input('newScholarship', '')
-        ];
-        
         try {
-            // Register user using AuthService
-            $userId = $this->authService->register($userData);
+            // Create user directly using Laravel's User model
+            $user = User::create([
+                'email' => $validated['newEmail'],
+                'password' => Hash::make($validated['newPass']),
+                'major' => $validated['newMajor'],
+                'year' => $validated['newYear'],
+                'scholarship' => $validated['newScholarship']
+            ]);
             
-            if ($userId) {
-                if ($this->isApiRequest()) {
-                    $this->jsonSuccess('Registration successful', ['user_id' => $userId], '/login');
-                } else {
-                    // Registration successful, redirect to login page with success message
-                    return $this->redirect('/login', ['success' => 1]);
-                }
-            } else {
-                // Registration failed, check user model for validation errors
-                $user = new User();
-                foreach ($userData as $key => $value) {
-                    if (property_exists($user, $key)) {
-                        $user->$key = $value;
-                    }
-                }
-                $user->validate();
-                $errors = $user->getErrors();
-                
-                if ($this->isApiRequest()) {
-                    $this->jsonError('Registration failed', $errors);
-                } else {
-                    if (isset($errors['email'])) {
-                        return $this->redirect('/register', ['error' => 'invalid_email']);
-                    } elseif (isset($errors['password'])) {
-                        return $this->redirect('/register', ['error' => 'password_too_short']);
-                    } else {
-                        // Generic error for other validation failures
-                        return $this->redirect('/register', ['error' => 'validation_failed']);
-                    }
-                }
+            // Log the user in using Auth facade
+            Auth::login($user);
+            
+            // Different response for API request
+            if ($this->isApiRequest()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Registration successful',
+                    'data' => ['user_id' => $user->id],
+                    'redirect' => route('login.form')
+                ]);
             }
+            
+            // Redirect to login page with success message for web request
+            return redirect()->route('login.form')->with('success', 1);
+            
         } catch (Exception $e) {
             // Log the error
             error_log("Registration error: " . $e->getMessage());
             
             if ($this->isApiRequest()) {
-                $this->jsonError('System error occurred', [], 500);
-            } else {
-                // Redirect to registration page with error
-                return $this->redirect('/register', ['error' => 'system_error']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'System error occurred',
+                    'errors' => []
+                ], 500);
             }
+            
+            // Redirect to registration page with error
+            return redirect()->route('register.form')->with('error', 'system_error');
         }
     }
     

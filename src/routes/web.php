@@ -65,6 +65,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
 });
 
+// Test route for API configuration
+Route::get('/test-api-config', [ApiController::class, 'testApiConfig']);
+
 // Error routes
 Route::get('/404', [ErrorController::class, 'notFound']);
 Route::get('/403', [ErrorController::class, 'forbidden']);

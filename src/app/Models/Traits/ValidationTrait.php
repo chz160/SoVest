@@ -5,27 +5,33 @@ namespace App\Models\Traits;
 trait ValidationTrait
 {
     /**
-     * Validation rules for the model
-     * Override this in your model to set specific rules
-     * 
-     * @var array
-     */
-    protected $rules = [];
-
-    /**
-     * Custom error messages for validation rules
-     * Override this in your model to set specific messages
-     * 
-     * @var array
-     */
-    protected $messages = [];
-
-    /**
      * Validation errors
      * 
      * @var array
      */
     protected $errors = [];
+    
+    /**
+     * Get validation rules
+     * Override this in your model to set specific rules
+     * 
+     * @return array
+     */
+    protected function getValidationRules()
+    {
+        return [];
+    }
+    
+    /**
+     * Get custom validation messages
+     * Override this in your model to set specific messages
+     * 
+     * @return array
+     */
+    protected function getValidationMessages()
+    {
+        return [];
+    }
 
     /**
      * Validate all attributes based on the defined rules
@@ -37,7 +43,7 @@ trait ValidationTrait
         $this->clearErrors();
         $valid = true;
 
-        foreach ($this->rules as $attribute => $rules) {
+        foreach ($this->getValidationRules() as $attribute => $rules) {
             if (!$this->validateAttribute($attribute, $this->{$attribute})) {
                 $valid = false;
             }
@@ -55,19 +61,21 @@ trait ValidationTrait
      */
     public function validateAttribute($attribute, $value)
     {
-        if (!isset($this->rules[$attribute])) {
+        $rules = $this->getValidationRules();
+        if (!isset($rules[$attribute])) {
             return true;
         }
 
-        $rules = is_array($this->rules[$attribute]) 
-               ? $this->rules[$attribute] 
-               : explode('|', $this->rules[$attribute]);
+        $validationRules = $this->getValidationRules();
+        $rules = is_array($validationRules[$attribute]) 
+               ? $validationRules[$attribute] 
+               : explode('|', $validationRules[$attribute]);
 
         foreach ($rules as $rule) {
             $parameters = [];
             
             // Check if rule has parameters
-            if (str_contains($rule, ':')) {
+            if (is_string($rule) && str_contains($rule, ':')) {
                 list($rule, $parameterStr) = explode(':', $rule, 2);
                 $parameters = explode(',', $parameterStr);
             }
@@ -318,12 +326,13 @@ trait ValidationTrait
      */
     protected function getMessage($attribute, $rule, $default)
     {
-        if (isset($this->messages["$attribute.$rule"])) {
-            return $this->messages["$attribute.$rule"];
+        $messages = $this->getValidationMessages();
+        if (isset($messages["$attribute.$rule"])) {
+            return $messages["$attribute.$rule"];
         }
         
-        if (isset($this->messages[$rule])) {
-            return $this->messages[$rule];
+        if (isset($messages[$rule])) {
+            return $messages[$rule];
         }
         
         return $default;

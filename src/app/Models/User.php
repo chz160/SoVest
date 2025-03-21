@@ -55,27 +55,37 @@ class User extends Authenticatable {
     }
 
     /**
-     * Validation rules for User model
+     * Get validation rules for User model
+     * 
+     * @return array
      */
-    protected $rules = [
-        'email' => ['required', 'email', 'unique'],
-        'password' => ['required', 'min:6'],
-        'first_name' => ['max:50'],
-        'last_name' => ['max:50']
-    ];
+    protected function getValidationRules()
+    {
+        return [
+            'email' => ['required', 'email', 'unique'],
+            'password' => ['required', 'min:6'], // This clearly specifies min length of 6
+            'first_name' => ['max:50'],
+            'last_name' => ['max:50']
+        ];
+    }
 
     /**
-     * Custom error messages for validation
+     * Get custom error messages for validation
+     * 
+     * @return array
      */
-    protected $messages = [
-        'email.required' => 'Email address is required',
-        'email.email' => 'Please provide a valid email address',
-        'email.unique' => 'This email address is already registered',
-        'password.required' => 'Password is required',
-        'password.min' => 'Password must be at least 6 characters long',
-        'first_name.max' => 'First name cannot exceed 50 characters',
-        'last_name.max' => 'Last name cannot exceed 50 characters'
-    ];
+    protected function getValidationMessages()
+    {
+        return [
+            'email.required' => 'Email address is required',
+            'email.email' => 'Please provide a valid email address',
+            'email.unique' => 'This email address is already registered',
+            'password.required' => 'Password is required',
+            'password.min' => 'Password must be at least 6 characters long',
+            'first_name.max' => 'First name cannot exceed 50 characters',
+            'last_name.max' => 'Last name cannot exceed 50 characters'
+        ];
+    }
 
     /**
      * Validate uniqueness of email in database

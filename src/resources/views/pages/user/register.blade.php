@@ -1,42 +1,32 @@
-<?php
-/**
- * User Registration View
- * 
- * This view displays the registration form for new SoVest users.
- */
+@extends('layouts.app')
 
-// Use the app layout for this view
-$this->setLayout('app');
+@section('title', 'Create Account')
 
-// Set view variables
-$pageTitle = $pageTitle ?? 'Create Account';
-$pageHeader = $pageHeader ?? 'Join SoVest';
-$pageSubheader = $pageSubheader ?? 'Create your account to start making stock predictions';
-?>
-
+@section('content')
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <!-- Display errors if any -->
-                <?php if (!empty($error)): ?>
+                @if (!empty($error))
                     <div class="alert alert-danger">
-                        <?php if ($error === 'invalid_email'): ?>
+                        @if ($error === 'invalid_email')
                             Please enter a valid email address.
-                        <?php elseif ($error === 'password_too_short'): ?>
+                        @elseif ($error === 'password_too_short')
                             Password must be at least 6 characters long.
-                        <?php elseif ($error === 'validation_failed'): ?>
+                        @elseif ($error === 'validation_failed')
                             Please check your information and try again.
-                        <?php elseif ($error === 'system_error'): ?>
+                        @elseif ($error === 'system_error')
                             A system error occurred. Please try again later.
-                        <?php else: ?>
+                        @else
                             An error occurred. Please try again.
-                        <?php endif; ?>
+                        @endif
                     </div>
-                <?php endif; ?>
+                @endif
 
                 <!-- Registration Form -->
-                <form method="post" action="/register/submit">
+                <form method="post" action="{{ route('register.submit') }}">
+                    @csrf
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="firstName" class="form-label">First Name</label>
@@ -99,3 +89,4 @@ $pageSubheader = $pageSubheader ?? 'Create your account to start making stock pr
         </div>
     </div>
 </div>
+@endsection
