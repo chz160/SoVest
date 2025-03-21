@@ -28,7 +28,7 @@ class UserController extends Controller
      * @param PredictionScoringServiceInterface|null $scoringService Prediction scoring service (optional)
      * @param array $services Additional services to inject (optional)
      */
-    public function __construct(AuthServiceInterface $authService = null, PredictionScoringServiceInterface $scoringService = null, array $services = [])
+    public function __construct(?AuthServiceInterface $authService, ?PredictionScoringServiceInterface $scoringService, array $services = [])
     {
         parent::__construct($authService, null, $services);
         

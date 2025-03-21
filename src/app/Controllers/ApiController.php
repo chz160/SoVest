@@ -42,9 +42,9 @@ class ApiController extends Controller
      * @param array $services Additional services to inject (optional)
      */
     public function __construct(
-        AuthServiceInterface $authService = null, 
-        SearchServiceInterface $searchService = null,
-        StockDataServiceInterface $stockService = null,
+        ?AuthServiceInterface $authService, 
+        ?SearchServiceInterface $searchService,
+        ?StockDataServiceInterface $stockService,
         array $services = []
     ) {
         parent::__construct($authService, $services);

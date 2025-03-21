@@ -94,8 +94,8 @@ abstract class Controller
      * @param array $services Additional services to inject
      */
     public function __construct(
-        AuthServiceInterface $authService = null, 
-        ResponseFormatterInterface $responseFormatter = null,
+        ?AuthServiceInterface $authService, 
+        ?ResponseFormatterInterface $responseFormatter,
         array $services = []
     ) {
         // Combine request data from different sources

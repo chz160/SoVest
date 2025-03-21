@@ -33,7 +33,7 @@ class SearchController extends Controller
      * @param SearchServiceInterface|null $searchService Search service (optional)
      * @param array $services Additional services to inject (optional)
      */
-    public function __construct(AuthServiceInterface $authService = null, SearchServiceInterface $searchService = null, array $services = [])
+    public function __construct(?AuthServiceInterface $authService, ?SearchServiceInterface $searchService, array $services = [])
     {
         parent::__construct($authService, null, $services);
         

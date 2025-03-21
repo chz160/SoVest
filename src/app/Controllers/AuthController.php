@@ -30,7 +30,7 @@ class AuthController extends Controller
      * @param AuthServiceInterface|null $authService Authentication service (injected)
      * @param array $services Additional services to inject (optional)
      */
-    public function __construct(AuthServiceInterface $authService = null, array $services = [])
+    public function __construct(?AuthServiceInterface $authService, array $services = [])
     {
         parent::__construct($authService, null, $services);
         

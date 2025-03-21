@@ -39,9 +39,9 @@ class DashboardController extends Controller
      * @param array $services Additional services to inject (optional)
      */
     public function __construct(
-        AuthServiceInterface $authService = null, 
-        StockDataServiceInterface $stockService = null,
-        PredictionScoringServiceInterface $scoringService = null,
+        ?AuthServiceInterface $authService, 
+        ?StockDataServiceInterface $stockService,
+        ?PredictionScoringServiceInterface $scoringService,
         array $services = []
     ) {
         parent::__construct($authService, $services);

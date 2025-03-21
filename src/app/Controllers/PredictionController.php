@@ -31,7 +31,7 @@ class PredictionController extends Controller
      * @param StockDataServiceInterface|null $stockService Stock data service (optional)
      * @param array $services Additional services to inject (optional)
      */
-    public function __construct(AuthServiceInterface $authService = null, StockDataServiceInterface $stockService = null, array $services = [])
+    public function __construct(?AuthServiceInterface $authService, ?StockDataServiceInterface $stockService, array $services = [])
     {
         parent::__construct($authService, null, $services);
         
