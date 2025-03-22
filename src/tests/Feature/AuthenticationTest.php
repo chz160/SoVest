@@ -41,7 +41,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Check that the user was created and redirected
-        $response->assertRedirect(route('login.form'));
+        $response->assertRedirect(route('login'));
     }
 
     /**
@@ -60,7 +60,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Check that we don't get redirected to success route
-        $this->assertNotEquals(route('login.form'), $response->headers->get('Location'));
+        $this->assertNotEquals(route('login'), $response->headers->get('Location'));
     }
 
     /**
@@ -79,7 +79,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Check that we don't get redirected to success route
-        $this->assertNotEquals(route('login.form'), $response->headers->get('Location'));
+        $this->assertNotEquals(route('login'), $response->headers->get('Location'));
     }
 
     /**
@@ -122,6 +122,6 @@ class AuthenticationTest extends TestCase
         ]);
 
         // Check that we don't get redirected to success route
-        $this->assertNotEquals(route('login.form'), $response->headers->get('Location'));
+        $this->assertNotEquals(route('login'), $response->headers->get('Location'));
     }
 }

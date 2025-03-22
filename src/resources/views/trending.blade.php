@@ -1,37 +1,17 @@
-{{-- 
-Original file contained session management and database connection logic 
-that should be moved to controllers in Laravel architecture.
---}}
+@extends('layouts.app')
 
-{{-- Original array for trending predictions - should come from controller --}}
+@section('title', 'Trending')
+
 @php
-// Dummy trending predictions (Replace this with data from controller)
-$trending_predictions = [
-    ['username' => 'Investor123', 'symbol' => 'AAPL', 'prediction' => 'Bullish', 'votes' => 120],
-    ['username' => 'MarketGuru', 'symbol' => 'TSLA', 'prediction' => 'Bearish', 'votes' => 95],
-    ['username' => 'StockSavvy', 'symbol' => 'AMZN', 'prediction' => 'Bullish', 'votes' => 75],
-];
+    // Dummy trending predictions (Replace this with data from controller)
+    $trending_predictions = [
+        ['username' => 'Investor123', 'symbol' => 'AAPL', 'prediction' => 'Bullish', 'votes' => 120],
+        ['username' => 'MarketGuru', 'symbol' => 'TSLA', 'prediction' => 'Bearish', 'votes' => 95],
+        ['username' => 'StockSavvy', 'symbol' => 'AMZN', 'prediction' => 'Bullish', 'votes' => 75],
+    ];
 @endphp
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trending Predictions - SoVest</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <style>
-        body { background-color: #2c2c2c; color: #d4d4d4; }
-        .navbar { background-color: #1f1f1f; }
-        .trending-container { max-width: 800px; margin: auto; margin-top: 30px; }
-        .post-card { background: #1f1f1f; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        .vote-section { display: flex; align-items: center; gap: 10px; }
-        .vote-btn { background: none; border: none; color: #28a745; cursor: pointer; font-size: 1.5rem; }
-        .vote-count { font-size: 1.2rem; }
-    </style>
-</head>
-<body>
+@section('content')
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}">SoVest</a>
@@ -68,6 +48,48 @@ $trending_predictions = [
         @endforeach
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection
+
+@push('styles')
+    <style type="text/css">
+        body {
+            background-color: #2c2c2c;
+            color: #d4d4d4;
+        }
+
+        .navbar {
+            background-color: #1f1f1f;
+        }
+
+        .trending-container {
+            max-width: 800px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        .post-card {
+            background: #1f1f1f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            color: #28a745;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .vote-count {
+            font-size: 1.2rem;
+        }
+    </style>
+@endpush
