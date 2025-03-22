@@ -1,29 +1,17 @@
-<?php
-	session_start();
-    // Retrieve the userID cookie. If not set, redirect the user to the login page. If it is set, save it as $userID
-	if(!isset($_COOKIE["userID"])){header("Location: login.php");}
-	else {$userID = $_COOKIE["userID"];}
+{{-- 
+Original file contained session management and database connection logic 
+that should be moved to controllers in Laravel architecture.
+--}}
 
-	$servername = "localhost";
-    $username = "hackberr_399";
-    $password = "MarthaBerry!";
-    $dbname = "hackberr_399";
-    $conn = mysqli_connect($servername, $username, $password, $dbname);
-    if (!$conn) {die("Connection failed: " . mysqli_connect_error());}
-
-?>
-
-
-<?php
-
-
-// Dummy trending predictions (Replace this with database query)
+{{-- Original array for trending predictions - should come from controller --}}
+@php
+// Dummy trending predictions (Replace this with data from controller)
 $trending_predictions = [
     ['username' => 'Investor123', 'symbol' => 'AAPL', 'prediction' => 'Bullish', 'votes' => 120],
     ['username' => 'MarketGuru', 'symbol' => 'TSLA', 'prediction' => 'Bearish', 'votes' => 95],
     ['username' => 'StockSavvy', 'symbol' => 'AMZN', 'prediction' => 'Bullish', 'votes' => 75],
 ];
-?>
+@endphp
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +20,7 @@ $trending_predictions = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trending Predictions - SoVest</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <style>
         body { background-color: #2c2c2c; color: #d4d4d4; }
         .navbar { background-color: #1f1f1f; }
@@ -46,21 +34,21 @@ $trending_predictions = [
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="index.php">SoVest</a>
-            <img src="./images/logo.png" width="50px">
+            <a class="navbar-brand" href="{{ url('/') }}">SoVest</a>
+            <img src="{{ asset('images/logo.png') }}" width="50px">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="search.php">Search</a></li>
-                    <li class="nav-item"><a class="nav-link" href="trending.php">Trending</a></li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item"><a class="nav-link" href="account.php">My Account</a></li>
-                        <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
-                    <?php else: ?>
-                        <li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>
-                    <?php endif; ?>
+                    <li class="nav-item"><a class="nav-link" href="{{ url('/search') }}">Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url('/trending') }}">Trending</a></li>
+                    @if (Auth::check())
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/account') }}">My Account</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/logout') }}">Logout</a></li>
+                    @else
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/login') }}">Login</a></li>
+                    @endif
                 </ul>
             </div>
         </div>
@@ -68,16 +56,16 @@ $trending_predictions = [
 
     <div class="container trending-container">
         <h2 class="text-center">Trending Predictions</h2>
-        <?php foreach ($trending_predictions as $post): ?>
+        @foreach ($trending_predictions as $post)
             <div class="post-card">
                 <div class="vote-section">
                     <button class="vote-btn">&#9650;</button>
-                    <span class="vote-count"><?php echo $post['votes']; ?></span>
+                    <span class="vote-count">{{ $post['votes'] }}</span>
                 </div>
-                <h5><?php echo $post['symbol']; ?> - <?php echo $post['prediction']; ?></h5>
-                <p>Posted by <strong><?php echo $post['username']; ?></strong></p>
+                <h5>{{ $post['symbol'] }} - {{ $post['prediction'] }}</h5>
+                <p>Posted by <strong>{{ $post['username'] }}</strong></p>
             </div>
-        <?php endforeach; ?>
+        @endforeach
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

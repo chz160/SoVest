@@ -1,18 +1,16 @@
-<?php
-require_once __DIR__ . '/crsf.php'; 
-?>
+{{-- Original file included CSRF protection with require_once '/crsf.php' --}}
 <!doctype html>
 <html lang="en" data-bs-theme="auto">
 	<head>
     	<meta charset="utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1">
     	<title>SoVest</title>
-		<link href="css/bootstrap.min.css" rel="stylesheet">   
+		<link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">   
 
-		<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-16x16.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-		<link rel="manifest" href="images/site.webmanifest">	
+		<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-16x16.png') }}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+		<link rel="manifest" href="{{ asset('images/site.webmanifest') }}">	
 		<style>
 			.card-body{
 				width: 70%;
@@ -25,13 +23,13 @@ require_once __DIR__ . '/crsf.php';
 		<div class="container py-3">
   			<header>
    				<div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-				   <a href="index.php" class="d-flex align-items-center link-body-emphasis text-decoration-none">
+				   <a href="{{ url('/') }}" class="d-flex align-items-center link-body-emphasis text-decoration-none">
        					<span class="fs-4">SoVest</span>
 					</a>
 
       				<nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-					  	<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="home.php">Home</a>
-	  					<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="about.php">About SoVest</a>
+					  	<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{{ url('/home') }}">Home</a>
+	  					<a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{{ url('/about') }}">About SoVest</a>
       				</nav>
     			</div>
 
@@ -51,8 +49,8 @@ require_once __DIR__ . '/crsf.php';
           					</div>
           					<div class="card-body">
 							  	<p>Sign up now to access stock picks from talented individuals and make your own predictions to boost that REP score!</p>
-								  <form action="/login/submit" method="post">
-								  <input type="hidden" name="_token" value="<?php echo $token; ?>">
+								  <form action="{{ url('/login/submit') }}" method="post">
+								  @csrf
 
 									<div class="form-floating">
 									<input type="email" class="form-control" id="email" name="email" required>
@@ -68,13 +66,13 @@ require_once __DIR__ . '/crsf.php';
 										<br>
 									
 
-								<a href="home.php">
+								<a href="{{ url('/home') }}">
 									<button class="btn btn-success w-100 py-2" type="submit">Log In</button>
 								</a>
 									</form>
 								<br>
 								<br>
-								<p>New to SoVest? <a href="acctNew.php">Sign Up Here!</a></p>
+								<p>New to SoVest? <a href="{{ url('/acctNew') }}">Sign Up Here!</a></p>
 
 							</div>
         				</div>
@@ -94,6 +92,6 @@ require_once __DIR__ . '/crsf.php';
 			</footer>
  
 		</div>
-		<script src="js/bootstrap.bundle.min.js"></script>
+		<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 	</body>
 </html>
