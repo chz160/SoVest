@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
 
 class AuthenticationTest extends TestCase
 {
     use WithFaker;
+    use RefreshDatabase;
 
     /**
      * Test that the registration page loads correctly.
