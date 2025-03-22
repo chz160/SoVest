@@ -1,0 +1,8 @@
+.env
+.env.dusk.local
+.ra-aid/
+**/vendor/
+error_log
+logs/
+.phpunit.cache/
+.phpunit.result.cache
