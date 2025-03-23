@@ -1,10 +1,8 @@
 @extends('layouts.app')
 
-@php
-// Set page-specific CSS and JS
-$pageCss = 'css/search.css';
-$pageJs = 'js/search.js';
-@endphp
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/search.css') }}">
+@endsection
 
 @section('content')
 <div class="container search-container mt-4">
@@ -221,4 +219,8 @@ $pageJs = 'js/search.js';
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('js/search.js') }}"></script>
 @endsection
