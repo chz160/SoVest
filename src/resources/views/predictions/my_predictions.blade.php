@@ -107,7 +107,7 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/prediction/prediction.js') }}"></script>
+    <script src="{{ asset('js/prediction.js') }}"></script>
     <script type="text/javascript">
         // Update API endpoint for prediction.js to use Laravel routes
         const apiEndpoints = {

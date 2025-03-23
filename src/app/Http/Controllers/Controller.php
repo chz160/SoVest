@@ -147,4 +147,64 @@ abstract class Controller
                 return self::ERROR_INVALID_REQUEST;
         }
     }
+
+    /**
+     * Store error message in session flash data and handle redirect
+     * 
+     * @param string $message Error message
+     * @param string|null $redirectUrl URL to redirect to (optional)
+     * @return void
+     */
+    protected function withError($message, $redirectUrl = null)
+    {
+        if ($redirectUrl) {
+            $this->responseFormatter->redirect($redirectUrl, self::HTTP_FOUND, ['error' => $message]);
+        } else {
+            if (isset($_SESSION)) {
+                $_SESSION['flash_error'] = $message;
+            }
+        }
+    }
+
+    /**
+     * Store success message in session flash data and handle redirect
+     * 
+     * @param string $message Success message
+     * @param string|null $redirectUrl URL to redirect to (optional)
+     * @return void
+     */
+    protected function withSuccess($message, $redirectUrl = null)
+    {
+        if ($redirectUrl) {
+            $this->responseFormatter->redirect($redirectUrl, self::HTTP_FOUND, ['success' => $message]);
+        } else {
+            if (isset($_SESSION)) {
+                $_SESSION['flash_success'] = $message;
+            }
+        }
+    }
+
+    /**
+     * Extract validation errors from model objects and store them in session flash data
+     * 
+     * @param object $model Model object implementing getErrors()
+     * @param string|null $redirectUrl URL to redirect to (optional)
+     * @return void
+     */
+    protected function withModelErrors($model, $redirectUrl = null)
+    {
+        $errors = [];
+        
+        if (method_exists($model, 'getErrors')) {
+            $errors = $model->getErrors();
+        }
+        
+        if ($redirectUrl) {
+            $this->responseFormatter->redirect($redirectUrl, self::HTTP_FOUND, ['errors' => $errors]);
+        } else {
+            if (isset($_SESSION)) {
+                $_SESSION['flash_errors'] = $errors;
+            }
+        }
+    }
 }

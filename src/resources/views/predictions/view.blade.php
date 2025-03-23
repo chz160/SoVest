@@ -279,7 +279,7 @@ HTML;
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/prediction/prediction.js') }}"></script>
+    <script src="{{ asset('js/prediction.js') }}"></script>
     <script>
     // Handle voting
     document.addEventListener('DOMContentLoaded', function() {
