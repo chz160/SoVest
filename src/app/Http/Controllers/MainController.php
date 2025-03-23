@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use App\Services\Interfaces\ResponseFormatterInterface;
 
 /**
  * Auth Controller
@@ -11,6 +12,11 @@ use Illuminate\Support\Facades\Auth;
  */
 class MainController extends Controller
 {
+    public function __construct(ResponseFormatterInterface $responseFormatter)
+    {
+        parent::__construct($responseFormatter);
+    }
+
     /**
      * Display the landing page for guests
      * 

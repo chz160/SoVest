@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Interfaces\ResponseFormatterInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,11 @@ use Exception;
  */
 class AuthController extends Controller
 {
+    public function __construct(ResponseFormatterInterface $responseFormatter)
+    {
+        parent::__construct($responseFormatter);
+    }
+
     /**
      * Display login form
      * 

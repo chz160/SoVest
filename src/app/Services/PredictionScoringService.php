@@ -10,70 +10,24 @@
 namespace App\Services;
 
 use App\Services\Interfaces\PredictionScoringServiceInterface;
-use Database\Models\User;
-use Database\Models\Prediction;
-use Database\Models\Stock;
-use Database\Models\StockPrice;
+use App\Models\User;
+use App\Models\Prediction;
+use App\Models\Stock;
+use App\Models\StockPrice;
 use Illuminate\Database\Capsule\Manager as DB;
 use Carbon\Carbon;
 
-// Load autoloader first to make sure all classes are available
-if (file_exists(dirname(dirname(__DIR__)) . '/vendor/autoload.php')) {
-    require_once dirname(dirname(__DIR__)) . '/vendor/autoload.php';
-}
-
-// Include the StockDataService for accessing price data
-require_once __DIR__ . '/StockDataService.php';
-require_once __DIR__ . '/../bootstrap/database.php';
-
-// Force load model files directly
-require_once __DIR__ . '/../database/models/User.php';
-require_once __DIR__ . '/../database/models/Stock.php';
-require_once __DIR__ . '/../database/models/Prediction.php';
-require_once __DIR__ . '/../database/models/StockPrice.php';
-
 class PredictionScoringService implements PredictionScoringServiceInterface {
-    /**
-     * @var PredictionScoringService|null Singleton instance of the service
-     */
-    private static $instance = null;
     
-    /**
-     * @var \Services\StockDataService The stock data service instance
-     */
+   
     private $stockService;
     
-    /**
-     * Get the singleton instance of PredictionScoringService
-     *
-     * @return PredictionScoringService
-     */
-    public static function getInstance()
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-    
-    /**
-     * Constructor - supports dependency injection for StockDataService
-     * while maintaining backward compatibility with singleton pattern
-     *
-     * @param \Services\StockDataService $stockService Stock data service (optional)
-     */
-    public function __construct($stockService = null) {
+     public function __construct(StockDataService $stockService) {
         // Initialize stock data service with dependency injection or fallback to singleton
-        $this->stockService = $stockService ?: \Services\StockDataService::getInstance();
+        $this->stockService = $stockService;
     }
     
-    /**
-     * Evaluate all active predictions that have reached their end date
-     * 
-     * @return array Results of evaluations
-     */
-    public function evaluateActivePredictions() {
+     public function evaluateActivePredictions() {
         $results = [
             'total' => 0,
             'evaluated' => 0,
@@ -387,4 +341,3 @@ class PredictionScoringService implements PredictionScoringServiceInterface {
         }
     }
 }
-?>

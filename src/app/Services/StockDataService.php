@@ -9,40 +9,13 @@
 namespace App\Services;
 
 use App\Services\Interfaces\StockDataServiceInterface;
-use Database\Models\Stock;
-use Database\Models\StockPrice;
+use App\Models\Stock;
+use App\Models\StockPrice;
 use Exception;
 
 class StockDataService implements StockDataServiceInterface
 {
-    /**
-     * @var StockDataService|null Singleton instance of the service
-     */
-    private static $instance = null;
-
-    /**
-     * Get the singleton instance of StockDataService
-     *
-     * @return StockDataService
-     */
-    public static function getInstance()
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
     private $lastApiCall = 0;
-    
-    /**
-     * Constructor - public to support dependency injection
-     * while maintaining backward compatibility with singleton pattern
-     */
-    public function __construct() {
-        // No need to establish database connection as Eloquent handles it
-    }
     
     /**
      * Add a stock to track
@@ -79,7 +52,7 @@ class StockDataService implements StockDataServiceInterface
             $this->fetchAndStoreStockData($symbol);
             return true;
         } catch (Exception $e) {
-            writeApiLog("Error adding stock: " . $e->getMessage());
+            error_log("Error adding stock: " . $e->getMessage());
             return false;
         }
     }
@@ -108,7 +81,7 @@ class StockDataService implements StockDataServiceInterface
             
             return false;
         } catch (Exception $e) {
-            writeApiLog("Error removing stock: " . $e->getMessage());
+            error_log("Error removing stock: " . $e->getMessage());
             return false;
         }
     }
@@ -129,7 +102,7 @@ class StockDataService implements StockDataServiceInterface
             
             return $query->orderBy('symbol')->get()->toArray();
         } catch (Exception $e) {
-            writeApiLog("Error getting stocks: " . $e->getMessage());
+            error_log("Error getting stocks: " . $e->getMessage());
             return [];
         }
     }
@@ -145,16 +118,16 @@ class StockDataService implements StockDataServiceInterface
         $this->respectRateLimit();
         
         $symbol = strtoupper($symbol);
-        $apiKey = ALPHA_VANTAGE_API_KEY;
-        $url = ALPHA_VANTAGE_BASE_URL . "?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey";
+        $apiKey = env("ALPHA_VANTAGE_API_KEY");
+        $url = env("ALPHA_VANTAGE_BASE_URL") . "?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey";
         
-        writeApiLog("Fetching stock data for $symbol");
+        error_log("Fetching stock data for $symbol");
         
         // Make API request
         $response = file_get_contents($url);
         
         if ($response === false) {
-            writeApiLog("API request failed for $symbol");
+            error_log("API request failed for $symbol");
             return false;
         }
         
@@ -163,7 +136,7 @@ class StockDataService implements StockDataServiceInterface
         
         // Check for API errors
         if (isset($data['Error Message'])) {
-            writeApiLog("API Error: " . $data['Error Message']);
+            error_log("API Error: " . $data['Error Message']);
             return false;
         }
         
@@ -180,7 +153,7 @@ class StockDataService implements StockDataServiceInterface
             ];
         }
         
-        writeApiLog("No data returned for $symbol");
+        error_log("No data returned for $symbol");
         return false;
     }
     
@@ -218,7 +191,7 @@ class StockDataService implements StockDataServiceInterface
             $stock = Stock::where('symbol', $symbol)->first();
             
             if (!$stock) {
-                writeApiLog("Error: Stock not found for symbol $symbol");
+                error_log("Error: Stock not found for symbol $symbol");
                 return false;
             }
             
@@ -235,7 +208,7 @@ class StockDataService implements StockDataServiceInterface
             
             return true;
         } catch (Exception $e) {
-            writeApiLog("Error storing price: " . $e->getMessage());
+            error_log("Error storing price: " . $e->getMessage());
             return false;
         }
     }
@@ -268,7 +241,7 @@ class StockDataService implements StockDataServiceInterface
             
             return false;
         } catch (Exception $e) {
-            writeApiLog("Error getting latest price: " . $e->getMessage());
+            error_log("Error getting latest price: " . $e->getMessage());
             return false;
         }
     }
@@ -311,7 +284,7 @@ class StockDataService implements StockDataServiceInterface
             
             return $history;
         } catch (Exception $e) {
-            writeApiLog("Error getting price history: " . $e->getMessage());
+            error_log("Error getting price history: " . $e->getMessage());
             return [];
         }
     }
@@ -359,10 +332,10 @@ class StockDataService implements StockDataServiceInterface
     private function respectRateLimit() {
         if ($this->lastApiCall > 0) {
             $elapsed = time() - $this->lastApiCall;
-            $waitTime = (60 / API_RATE_LIMIT) - $elapsed;
+            $waitTime = (60 / env("API_RATE_LIMIT")) - $elapsed;
             
             if ($waitTime > 0) {
-                writeApiLog("Rate limiting: waiting $waitTime seconds");
+                error_log("Rate limiting: waiting $waitTime seconds");
                 sleep($waitTime);
             }
         }

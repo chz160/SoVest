@@ -10,6 +10,10 @@ use App\Http\Controllers\SearchController;
 // We're not really using routes here we just want to redirect to main.php
 
 Route::get('/', [MainController::class, 'index'])->name('landing');
+Route::get('/about', [MainController::class, 'about'])->name('about');
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register.form');
 Route::post('/register/submit', [AuthController::class, 'register'])->name('register.submit');
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
@@ -21,7 +25,7 @@ Route::get('/account', [UserController::class, 'account'])->name('user.account')
 Route::get('/leaderboard', [UserController::class, 'leaderboard'])->name('user.leaderboard')->middleware('auth');
 
 Route::controller(PredictionController::class)->group(function () {
-    Route::get('/predictions', 'index')->name('predictions.index');
+    Route::get('/predictions', 'index')->name('predictions.index')->middleware('auth');
     Route::get('/predictions/view/{id}', 'view')->name('predictions.view');
     Route::get('/predictions/trending', 'trending')->name('predictions.trending');
     Route::get('/predictions/create', 'create')->name('predictions.create')->middleware('auth');
@@ -32,5 +36,18 @@ Route::controller(PredictionController::class)->group(function () {
     Route::post('/vote/{id}', 'vote')->name('predictions.vote')->middleware('auth');
 });
 
-Route::get('/about', [MainController::class, 'about'])->name('about');
-Route::get('/search', [SearchController::class, 'index'])->name('search');
+// API routes
+Route::prefix('api')->middleware('api')->name('api.')->group(function () {
+    Route::match(['GET', 'POST'], '/predictions', [PredictionController::class, 'apiHandler'])->name('predictions');
+    Route::post('/predictions/create', [PredictionController::class, 'store'])->name('predictions.create');
+    Route::post('/predictions/update', [PredictionController::class, 'update'])->name('predictions.update');
+    Route::post('/predictions/delete', [PredictionController::class, 'delete'])->name('predictions.delete');
+    Route::get('/predictions/get', [PredictionController::class, 'apiGetPrediction'])->name('predictions.get');
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/search_stocks', [SearchController::class, 'searchStocks'])->name('search_stocks');
+    Route::get('/stocks', [SearchController::class, 'stocks'])->name('stocks');
+    Route::get('/stocks/{symbol}', [SearchController::class, 'getStock'])->name('stocks.get')
+        ->where('symbol', '[A-Z]{1,5}');
+    Route::get('/stocks/{symbol}/price', [SearchController::class, 'getStockPrice'])->name('stocks.price')
+        ->where('symbol', '[A-Z]{1,5}');
+});
