@@ -52,7 +52,7 @@ class StockDataService implements StockDataServiceInterface
             $this->fetchAndStoreStockData($symbol);
             return true;
         } catch (Exception $e) {
-            error_log("Error adding stock: " . $e->getMessage());
+            writeApiLog("Error adding stock: " . $e->getMessage());
             return false;
         }
     }
@@ -81,7 +81,7 @@ class StockDataService implements StockDataServiceInterface
             
             return false;
         } catch (Exception $e) {
-            error_log("Error removing stock: " . $e->getMessage());
+            writeApiLog("Error removing stock: " . $e->getMessage());
             return false;
         }
     }
@@ -102,7 +102,7 @@ class StockDataService implements StockDataServiceInterface
             
             return $query->orderBy('symbol')->get()->toArray();
         } catch (Exception $e) {
-            error_log("Error getting stocks: " . $e->getMessage());
+            writeApiLog("Error getting stocks: " . $e->getMessage());
             return [];
         }
     }
@@ -118,16 +118,16 @@ class StockDataService implements StockDataServiceInterface
         $this->respectRateLimit();
         
         $symbol = strtoupper($symbol);
-        $apiKey = env("ALPHA_VANTAGE_API_KEY");
-        $url = env("ALPHA_VANTAGE_BASE_URL") . "?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey";
+        $apiKey = "ALPHA_VANTAGE_API_KEY";
+        $url = "ALPHA_VANTAGE_BASE_URL" . "?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey";
         
-        error_log("Fetching stock data for $symbol");
+        writeApiLog("Fetching stock data for $symbol");
         
         // Make API request
         $response = file_get_contents($url);
         
         if ($response === false) {
-            error_log("API request failed for $symbol");
+            writeApiLog("API request failed for $symbol");
             return false;
         }
         
@@ -136,7 +136,7 @@ class StockDataService implements StockDataServiceInterface
         
         // Check for API errors
         if (isset($data['Error Message'])) {
-            error_log("API Error: " . $data['Error Message']);
+            writeApiLog("API Error: " . $data['Error Message']);
             return false;
         }
         
@@ -153,7 +153,7 @@ class StockDataService implements StockDataServiceInterface
             ];
         }
         
-        error_log("No data returned for $symbol");
+        writeApiLog("No data returned for $symbol");
         return false;
     }
     
@@ -191,7 +191,7 @@ class StockDataService implements StockDataServiceInterface
             $stock = Stock::where('symbol', $symbol)->first();
             
             if (!$stock) {
-                error_log("Error: Stock not found for symbol $symbol");
+                writeApiLog("Error: Stock not found for symbol $symbol");
                 return false;
             }
             
@@ -208,7 +208,7 @@ class StockDataService implements StockDataServiceInterface
             
             return true;
         } catch (Exception $e) {
-            error_log("Error storing price: " . $e->getMessage());
+            writeApiLog("Error storing price: " . $e->getMessage());
             return false;
         }
     }
@@ -241,7 +241,7 @@ class StockDataService implements StockDataServiceInterface
             
             return false;
         } catch (Exception $e) {
-            error_log("Error getting latest price: " . $e->getMessage());
+            writeApiLog("Error getting latest price: " . $e->getMessage());
             return false;
         }
     }
@@ -284,7 +284,7 @@ class StockDataService implements StockDataServiceInterface
             
             return $history;
         } catch (Exception $e) {
-            error_log("Error getting price history: " . $e->getMessage());
+            writeApiLog("Error getting price history: " . $e->getMessage());
             return [];
         }
     }
@@ -332,10 +332,10 @@ class StockDataService implements StockDataServiceInterface
     private function respectRateLimit() {
         if ($this->lastApiCall > 0) {
             $elapsed = time() - $this->lastApiCall;
-            $waitTime = (60 / env("API_RATE_LIMIT")) - $elapsed;
+            $waitTime = (60 / "API_RATE_LIMIT") - $elapsed;
             
             if ($waitTime > 0) {
-                error_log("Rate limiting: waiting $waitTime seconds");
+                writeApiLog("Rate limiting: waiting $waitTime seconds");
                 sleep($waitTime);
             }
         }

@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * UpdateStockPrices
  * 
- * Invocable class for updating stock prices that replaces the functionality
- * of the update_stock_prices.php cron job
+ * Invocable class for updating stock prices
  */
 class UpdateStockPrices
 {

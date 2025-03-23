@@ -39,7 +39,7 @@ class Stock extends Model {
      *
      * @var array<int, string>
      */
-    protected $fillable = ['symbol', 'company_name', 'sector', 'created_at'];
+    protected $fillable = ['symbol', 'company_name', 'sector', 'active', 'created_at'];
 
     /**
      * The model's default values for attributes.
@@ -59,6 +59,7 @@ class Stock extends Model {
     {
         return [
             'created_at' => 'datetime',
+            'active' => 'boolean'
         ];
     }
 
