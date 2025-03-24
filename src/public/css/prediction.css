@@ -2,10 +2,12 @@
  * SoVest Prediction Styles
  */
 
-/* Stock suggestions */
+/* Stock suggestions - Updated positioning */
 #stock-suggestions {
     position: relative;
     z-index: 1000;
+    width: 100%;
+    margin-top: 0;
 }
 
 #stock-suggestions .list-group {
@@ -15,12 +17,22 @@
     overflow-y: auto;
     border: 1px solid #444;
     border-radius: 5px;
+    margin-top: 5px; /* Add spacing between input and dropdown */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+    z-index: 1500; /* Ensure it appears above other elements */
 }
 
+/* Ensure list-group-items are properly styled and visible */
 #stock-suggestions .list-group-item {
     padding: 10px 15px;
     cursor: pointer;
     transition: background-color 0.2s;
+    display: block; /* Ensure items are displayed as blocks */
+    border-bottom: 1px solid #444; /* Add separator between items */
+}
+
+#stock-suggestions .list-group-item:last-child {
+    border-bottom: none; /* Remove border from last item */
 }
 
 #stock-suggestions .list-group-item:hover {

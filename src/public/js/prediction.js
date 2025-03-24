@@ -155,6 +155,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 stockSuggestions.innerHTML = '';
             }
         });
+        
+        // Show suggestions when focusing on the search input if there's content
+        stockSearchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0 && stockSuggestions.innerHTML === '') {
+                // Trigger the input event to show suggestions
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+        
+        // Handle keyboard navigation in suggestions
+        stockSearchInput.addEventListener('keydown', function(event) {
+            const suggestions = stockSuggestions.querySelectorAll('.list-group-item');
+            if (suggestions.length === 0) return;
+            
+            // Find currently highlighted item
+            const current = stockSuggestions.querySelector('.list-group-item.active');
+            let index = -1;
+            
+            if (current) {
+                for (let i = 0; i < suggestions.length; i++) {
+                    if (suggestions[i] === current) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            
+            // Handle arrow keys
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (current) current.classList.remove('active');
+                index = (index + 1) % suggestions.length;
+                suggestions[index].classList.add('active');
+                suggestions[index].scrollIntoView({ block: 'nearest' });
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (current) current.classList.remove('active');
+                index = (index - 1 + suggestions.length) % suggestions.length;
+                suggestions[index].classList.add('active');
+                suggestions[index].scrollIntoView({ block: 'nearest' });
+            } else if (event.key === 'Enter' && current) {
+                event.preventDefault();
+                current.click();
+            } else if (event.key === 'Escape') {
+                stockSuggestions.innerHTML = '';
+            }
+        });
     }
 
     /**

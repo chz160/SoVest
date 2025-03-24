@@ -81,9 +81,10 @@
                                             title="Type at least 2 characters to search for a stock. Select one from the dropdown.">
                                             <i class="bi bi-info-circle"></i>
                                         </span>
-                                        <div id="stock-suggestions" class="mt-2"></div>
                                         <input type="hidden" id="stock_id" name="stock_id" required>
-                                        <div class="form-text">Start typing to search for stocks. Select one from the dropdown suggestions.</div>
+                                    </div>
+                                    <div id="stock-suggestions" class="mt-2"></div>
+                                    <div class="form-text">Start typing to search for stocks. Select one from the dropdown suggestions.</div>
                                     @endif
                                 </div>
                                 @error('stock_id')
