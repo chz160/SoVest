@@ -52,6 +52,12 @@
                 </div>
             </form>
             
+            @if (isset($predictionIntentDetected) && $predictionIntentDetected)
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i> It looks like you're searching for stock predictions. We've prioritized stock results to help you make predictions easier. <a href="{{ url('predictions/create') }}" class="alert-link">Create a new prediction</a>.
+                </div>
+            @endif
+            
             @if (!empty($query) && empty($results))
                 <div class="alert alert-info">
                     No results found for "{{ $query }}". Try adjusting your search.
@@ -73,14 +79,21 @@
                     @foreach($results as $result)
                         <div class="search-result-card">
                             @if($result['result_type'] == 'stock')
-                                <div class="d-flex align-items-center">
-                                    <div class="stock-icon">
-                                        <i class="bi bi-graph-up-arrow"></i>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="stock-icon">
+                                            <i class="bi bi-graph-up-arrow"></i>
+                                        </div>
+                                        <div class="result-content">
+                                            <h4>{{ $result['symbol'] }}</h4>
+                                            <p>{{ $result['company_name'] }}</p>
+                                            <span class="badge bg-secondary">{{ $result['sector'] }}</span>
+                                        </div>
                                     </div>
-                                    <div class="result-content">
-                                        <h4>{{ $result['symbol'] }}</h4>
-                                        <p>{{ $result['company_name'] }}</p>
-                                        <span class="badge bg-secondary">{{ $result['sector'] }}</span>
+                                    <div>
+                                        <a href="{{ url('predictions/create') }}?stock_id={{ $result['id'] }}&symbol={{ urlencode($result['symbol']) }}&company_name={{ urlencode($result['company_name']) }}" class="btn btn-success btn-sm">
+                                            <i class="bi bi-lightning-charge"></i> Create Prediction
+                                        </a>
                                     </div>
                                 </div>
                                 

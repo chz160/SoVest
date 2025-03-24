@@ -5,6 +5,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Log;
+use App\Tasks\UpdateStockListings;
 use App\Tasks\UpdateStockPrices;
 use App\Tasks\EvaluatePredictions;
 
@@ -12,6 +13,22 @@ Artisan::command('inspire', function () {
     /** @var ClosureCommand $this */
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Manual execution of UpdateStockPrices task
+Artisan::command('stocks:listings', function () {
+    /** @var ClosureCommand $this */
+    $this->info('Starting stock listings update...');
+    
+    try {
+        // Use container to call the invokable class with DI
+        app()->call(UpdateStockListings::class);
+        
+        $this->info('Stock listings updated successfully.');
+    } catch (\Exception $e) {
+        $this->error('Failed to update stock listings: ' . $e->getMessage());
+        Log::error('Failed to update stock listings: ' . $e->getMessage());
+    }
+})->purpose('Update stock prices manually');
 
 // Manual execution of UpdateStockPrices task
 Artisan::command('stocks:update', function () {
@@ -44,6 +61,13 @@ Artisan::command('predictions:evaluate', function () {
         Log::error('Failed to evaluate predictions: ' . $e->getMessage());
     }
 })->purpose('Evaluate predictions manually');
+
+// Schedule the UpdateStockPrices task to run hourly
+Schedule::call(function () {
+    app()->call(UpdateStockListings::class);
+})
+    ->weekly()
+    ->appendOutputTo(storage_path('logs/stock-listings.log'));
 
 // Schedule the UpdateStockPrices task to run hourly
 Schedule::call(function () {

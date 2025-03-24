@@ -6,8 +6,10 @@ use App\Services\Interfaces\ResponseFormatterInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\SavedSearch;
+use App\Models\Stock;
 use Exception;
 use App\Services\Interfaces\SearchServiceInterface;
+use App\Services\Interfaces\StockDataServiceInterface;
 
 
 class SearchController extends Controller
@@ -17,12 +19,18 @@ class SearchController extends Controller
      */
     protected $searchService;
     
-    public function __construct(ResponseFormatterInterface $responseFormatter, SearchServiceInterface $searchService)
+    /**
+     * @var StockDataServiceInterface Stock data service instance
+     */
+    protected $stockDataService;
+    
+    public function __construct(ResponseFormatterInterface $responseFormatter, SearchServiceInterface $searchService, StockDataServiceInterface $stockDataService)
     {
         parent::__construct($responseFormatter);
         $this->searchService = $searchService;
+        $this->stockDataService = $stockDataService;
     }
-
+    
     public function index(Request $request)
     {
         $userID = Auth::id();
@@ -35,6 +43,16 @@ class SearchController extends Controller
         $page = (int)$request->input('page', 1);
         $limit = 10;
         $offset = ($page - 1) * $limit;
+
+        // Detect prediction intent in search query
+        $hasPredictionIntent = $this->detectPredictionIntent($query);
+
+        // Store original type for UI and prioritize stocks if prediction intent is detected
+        $originalType = $type;
+        if ($hasPredictionIntent && ($type === 'all' || empty($type))) {
+            // Only override if user hasn't explicitly chosen a different type
+            $type = 'stocks';
+        }
         
         // Load user's saved searches
         $savedSearches = [];
@@ -87,7 +105,7 @@ class SearchController extends Controller
         // Render the view
         return view('search/index', [
             'query' => $query,
-            'type' => $type,
+            'type' => $originalType, // Use original type for UI consistency
             'prediction' => $prediction,
             'sort' => $sort,
             'page' => $page,
@@ -95,8 +113,42 @@ class SearchController extends Controller
             'totalResults' => $totalResults,
             'savedSearches' => $savedSearches,
             'searchHistory' => $searchHistory,
-            'pageTitle' => $pageTitle
+            'pageTitle' => $pageTitle,
+            'hasPredictionIntent' => $hasPredictionIntent,
+            'predictionIntentDetected' => $hasPredictionIntent && $originalType === 'all'
         ]);
+    }
+
+    /**
+     * Detect prediction intent in search query
+     * 
+     * @param string $query Search query
+     * @return bool True if prediction intent detected
+     */
+    private function detectPredictionIntent($query)
+    {
+        if (empty($query)) {
+            return false;
+        }
+        
+        // Keywords that indicate prediction intent
+        $predictionKeywords = [
+            'predict', 'prediction', 'forecast', 'bullish', 'bearish',
+            'stock prediction', 'market prediction', 'price target',
+            'will rise', 'will fall', 'going up', 'going down',
+            'target price', 'stock forecast', 'future price'
+        ];
+        
+        // Case-insensitive check for keywords
+        $lowercaseQuery = strtolower($query);
+        
+        foreach ($predictionKeywords as $keyword) {
+            if (strpos($lowercaseQuery, $keyword) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -261,5 +313,46 @@ class SearchController extends Controller
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+    }
+    
+    /**
+     * Search for stocks by term
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchStocks(Request $request)
+    {
+        // Validate the request
+        $term = $request->input('term');
+        
+        if (empty($term)) {
+            return $this->jsonError('Search term is required');
+        }
+        
+        try {
+            // Query the database directly for matching stocks
+            $stocks = Stock::where('active', true)
+                ->where(function($query) use ($term) {
+                    $query->where('symbol', $term);
+                })
+                ->limit(1)
+                ->get(['stock_id', 'symbol', 'company_name']);
+            
+            $formattedResults = [];
+            
+            // Format database results
+            foreach ($stocks as $stock) {
+                $formattedResults[] = [
+                    'id' => $stock->stock_id,
+                    'symbol' => $stock->symbol,
+                    'name' => $stock->company_name
+                ];
+            }
+            
+            return $this->jsonSuccess('Stocks found successfully', $formattedResults);
+        } catch (\Exception $e) {
+            return $this->jsonError('Error searching for stocks: ' . $e->getMessage());
+        }
     }
 }

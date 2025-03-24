@@ -45,6 +45,7 @@ class SearchService implements SearchServiceInterface
             
             $searchParam = "%{$query}%";
             $searchResults = [];
+            error_log("Performing search: $query, type: $type, prediction: $prediction, sort: $sort, limit: $limit, offset: $offset");
             
             switch ($type) {
                 case 'stocks':

@@ -15,7 +15,7 @@ class ApiLogHelper
      */
     public static function writeApiLog($message)
     {
-        $logFile = config('stock_api_config.STOCK_API_LOG_FILE', __DIR__ . '/../../logs/stock_api.log');
+        $logFile = config('api_config.STOCK_API_LOG_FILE', __DIR__ . '/../../logs/stock_api.log');
         
         // Create directory if it doesn't exist
         $logDir = dirname($logFile);
@@ -26,5 +26,6 @@ class ApiLogHelper
         $timestamp = date('Y-m-d H:i:s');
         $logEntry = "[$timestamp] $message" . PHP_EOL;
         file_put_contents($logFile, $logEntry, FILE_APPEND);
+        syslog(LOG_INFO, $logEntry);
     }
 }

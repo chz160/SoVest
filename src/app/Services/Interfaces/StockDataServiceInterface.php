@@ -87,9 +87,9 @@ interface StockDataServiceInterface
     public function updateAllStocks();
 
     /**
-     * Initialize default stocks
+     * Updates stocks table with all listed stocks
      * 
-     * @return array Results of each stock addition
+     * @return boolean Results of each stock addition
      */
-    public function initializeDefaultStocks();
+    public function updateStockListings();
 }

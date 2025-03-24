@@ -95,9 +95,10 @@ function setupSearchSuggestions(inputElement, suggestionsContainer) {
             return;
         }
         
+        if (new RegExp(/([A-Za-z]{1,5})(-[A-Za-z]{1,2})?/g).test(query) !== true) return;
         // Debounce to avoid excessive API calls
         debounceTimer = setTimeout(() => {
-            fetchSuggestions(query, type, suggestionsContainer);
+            fetchSuggestions(query.toUpperCase(), type, suggestionsContainer, inputElement);
         }, 300);
     });
     
@@ -120,11 +121,16 @@ function setupSearchSuggestions(inputElement, suggestionsContainer) {
 /**
  * Fetch search suggestions from the API
  */
-function fetchSuggestions(query, type, suggestionsContainer) {
+function fetchSuggestions(query, type, suggestionsContainer, inputElement) {
     fetch(`/api/search?action=suggestions&query=${encodeURIComponent(query)}&type=${type}`)
         .then(response => response.json())
         .then(data => {
             suggestionsContainer.innerHTML = '';
+            
+            // Check for prediction intent and display if available
+            if (data.predictionIntent) {
+                displayPredictionIntent(data.predictionIntent, suggestionsContainer);
+            }
             
             if (data.suggestions && data.suggestions.length > 0) {
                 data.suggestions.forEach(suggestion => {
@@ -145,9 +151,44 @@ function fetchSuggestions(query, type, suggestionsContainer) {
                             break;
                     }
                     
-                    suggestionDiv.innerHTML = `${icon} ${suggestion.text}`;
+                    // Create suggestion content wrapper
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'suggestion-content';
                     
-                    suggestionDiv.addEventListener('click', function() {
+                    // Add prediction type indicator for prediction suggestions
+                    if (suggestion.type === 'prediction' && suggestion.predictionType) {
+                        const badgeClass = suggestion.predictionType === 'Bullish' ? 'bg-success' : 'bg-danger';
+                        contentDiv.innerHTML = `${icon} ${suggestion.text} <span class="badge ${badgeClass} ms-2">${suggestion.predictionType}</span>`;
+                    } else {
+                        contentDiv.innerHTML = `${icon} ${suggestion.text}`;
+                    }
+                    
+                    suggestionDiv.appendChild(contentDiv);
+                    
+                    // Add create prediction button for stock suggestions
+                    if (suggestion.type === 'stock' && suggestion.id) {
+                        const actionDiv = document.createElement('div');
+                        actionDiv.className = 'suggestion-actions';
+                        
+                        const createPredBtn = document.createElement('button');
+                        createPredBtn.className = 'btn btn-sm btn-primary create-prediction-btn';
+                        createPredBtn.innerHTML = '<i class="bi bi-lightning-charge"></i> Predict';
+                        
+                        createPredBtn.addEventListener('click', function(e) {
+                            e.stopPropagation(); // Prevent triggering parent click
+                            window.location.href = `/predictions/create?stock_id=${suggestion.id}`;
+                        });
+                        
+                        actionDiv.appendChild(createPredBtn);
+                        suggestionDiv.appendChild(actionDiv);
+                    }
+                    
+                    suggestionDiv.addEventListener('click', function(e) {
+                        // Don't handle click if the create prediction button was clicked
+                        if (e.target.closest('.create-prediction-btn')) {
+                            return;
+                        }
+                        
                         // Set input value and submit the containing form
                         const form = inputElement.closest('form');
                         inputElement.value = suggestion.text.split(' - ')[0]; // Use symbol/name only
@@ -178,6 +219,56 @@ function fetchSuggestions(query, type, suggestionsContainer) {
             console.error('Error fetching suggestions:', error);
             suggestionsContainer.style.display = 'none';
         });
+}
+
+/**
+ * Display prediction intent message and action button
+ */
+function displayPredictionIntent(intentData, container) {
+    const intentDiv = document.createElement('div');
+    intentDiv.className = 'prediction-intent';
+    
+    const stockName = intentData.stockName || 'this stock';
+    const predictionType = intentData.predictionType || '';
+    
+    let message = `Looks like you want to make a prediction about ${stockName}`;
+    if (predictionType) {
+        const typeText = predictionType === 'Bullish' ? 'will rise' : 'will fall';
+        message += ` that it ${typeText}`;
+    }
+    
+    intentDiv.innerHTML = `
+        <div class="intent-content">
+            <i class="bi bi-lightbulb text-warning"></i>
+            <p>${message}</p>
+        </div>
+        <button class="btn btn-success create-prediction-btn">
+            <i class="bi bi-lightning-charge"></i> Create Prediction
+        </button>
+    `;
+    
+    // Add click handler to create prediction button
+    const createBtn = intentDiv.querySelector('.create-prediction-btn');
+    if (createBtn) {
+        createBtn.addEventListener('click', function() {
+            let url = '/predictions/create';
+            
+            // Add stock ID if available
+            if (intentData.stockId) {
+                url += `?stock_id=${intentData.stockId}`;
+                
+                // Add prediction type if available
+                if (predictionType) {
+                    url += `&prediction_type=${predictionType}`;
+                }
+            }
+            
+            window.location.href = url;
+        });
+    }
+    
+    // Add to container as the first element
+    container.appendChild(intentDiv);
 }
 
 /**

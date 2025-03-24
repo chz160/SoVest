@@ -68,12 +68,35 @@ class PredictionController extends Controller
             // Get all active stocks for the dropdown using the injected service
             $stocks = $this->stockService->getStocks(true);
             
+            // Check for stock parameters in the URL
+            $stockId = $request->query('stock_id');
+            $symbol = $request->query('symbol');
+            $companyName = $request->query('company_name');
+            
+            // Default prediction data
+            $prediction = null;
+            
+            // If stock parameters are provided, pre-populate the form
+            if ($stockId && $symbol && $companyName) {
+                $prediction = [
+                    'stock_id' => $stockId,
+                    'symbol' => $symbol,
+                    'company_name' => $companyName,
+                    // Add other default fields to ensure the form works correctly
+                    'prediction_type' => null,
+                    'target_price' => null,
+                    'end_date' => null,
+                    'reasoning' => null
+                ];
+            }
+            
             // Render the create prediction form
             return view('predictions/create', [
                 'stocks' => $stocks,
                 'isEditing' => false,
-                'prediction' => null,
-                'pageTitle' => 'Create Prediction'
+                'prediction' => $prediction,
+                'pageTitle' => 'Create Prediction',
+                'hasPreselectedStock' => ($stockId && $symbol && $companyName)
             ]);
         } catch (\Exception $e) {
             error_log("Error loading stock data: " . $e->getMessage());
