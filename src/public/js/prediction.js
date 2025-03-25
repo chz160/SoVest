@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update the form text to inform users of business day constraints
     if (
-        document.querySelector('#end_date') != null &&
-        document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text').length() > 0) {
+        endDateInput != null &&
+        document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text') != null) {
         const dateHelpText = document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text');
         dateHelpText.innerHTML = `Select a business day (Monday-Friday) between <strong>${formatDateForDisplay(minDate)}</strong> and <strong>${formatDateForDisplay(maxDate)}</strong>. Predictions must be within 5 business days.`;
     }
@@ -180,14 +180,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Close suggestions when clicking outside
         document.addEventListener('click', function (event) {
-            if (!stockSearchInput.contains(event.target) && !stockSuggestions.contains(event.target)) {
+            if (!stockSearchInput.contains(event.target) && stockSuggestions != null && !stockSuggestions.contains(event.target)) {
                 stockSuggestions.innerHTML = '';
             }
         });
 
         // Show suggestions when focusing on the search input if there's content
         stockSearchInput.addEventListener('focus', function () {
-            if (this.value.trim().length > 0 && stockSuggestions.innerHTML === '') {
+            if (this.value.trim().length > 0 && stockSuggestions != null && stockSuggestions.innerHTML === '') {
                 // Trigger the input event to show suggestions
                 this.dispatchEvent(new Event('input'));
             }

@@ -31,9 +31,9 @@ Route::controller(PredictionController::class)->group(function () {
     Route::get('/predictions/create', 'create')->name('predictions.create')->middleware('auth');
     Route::post('/predictions/store', 'store')->name('predictions.store')->middleware('auth');
     Route::get('/predictions/edit/{id}', 'edit')->name('predictions.edit')->middleware('auth')->middleware('prediction.owner');
-    Route::post('/update/{id}', 'update')->name('predictions.update')->middleware('auth')->middleware('prediction.owner');
-    Route::post('/delete/{id}', 'delete')->name('predictions.delete')->middleware('auth')->middleware('prediction.owner');
-    Route::post('/vote/{id}', 'vote')->name('predictions.vote')->middleware('auth');
+    Route::post('/predictions/update/{id}', 'update')->name('predictions.update')->middleware('auth')->middleware('prediction.owner');
+    Route::post('/predictions/delete/{id}', 'delete')->name('predictions.delete')->middleware('auth')->middleware('prediction.owner');
+    Route::post('/predictions/vote/{id}', 'vote')->name('predictions.vote')->middleware('auth');
 });
 
 // API routes

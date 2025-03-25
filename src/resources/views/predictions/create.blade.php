@@ -54,7 +54,7 @@
                 <div class="prediction-form card shadow-sm">
                     <div class="card-body">
                         <form id="prediction-form"
-                            action="{{ $isEditing ? route('predictions.update') : route('predictions.store') }}"
+                            action="{{ $isEditing ? route('predictions.update', $prediction['prediction_id']) : route('predictions.store') }}"
                             method="post"
                             autocomplete="off">
                             @csrf

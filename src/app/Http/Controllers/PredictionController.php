@@ -142,7 +142,6 @@ class PredictionController extends Controller
             } else {
                 // Get validation errors
                 $errors = $prediction->getErrors();
-                //error_log(''. $errors);
                 
                 // Determine if this is an API request or a form submission
                 if ($this->isApiRequest()) {
@@ -183,16 +182,12 @@ class PredictionController extends Controller
     /**
      * Show the prediction edit form
      */
-    public function edit(Request $request)
+    public function edit(Request $request, int $id)
     {
         // Get user data
-        $user = Auth::user();
         $userId = Auth::id();
-        
-        // Get the prediction ID from the request
-        $predictionId = $request->input('id');
-        
-        if (!$predictionId) {
+  
+        if (!$id) {
             $this->withError("Missing prediction ID");
             return $this->responseFormatter->redirect('/predictions');
         }
@@ -200,7 +195,7 @@ class PredictionController extends Controller
         try {
             // Fetch the prediction with its related stock using Eloquent
             $predictionModel = Prediction::with('stock')
-                ->where('prediction_id', $predictionId)
+                ->where('prediction_id', $id)
                 ->where('user_id', $userId)
                 ->first();
             
@@ -240,16 +235,12 @@ class PredictionController extends Controller
     /**
      * Handle prediction update form submission
      */
-    public function update(Request $request)
+    public function update(Request $request, int $id)
     {
         // Get user data
-        $user = Auth::user();
         $userId = Auth::id();
         
-        // Get the prediction ID from the request
-        $predictionId = $request->input('prediction_id');
-        
-        if (!$predictionId) {
+        if (!$id) {
             if ($this->isApiRequest()) {
                 $this->jsonError("Missing prediction ID");
             } else {
@@ -258,10 +249,10 @@ class PredictionController extends Controller
             }
             return;
         }
-        
+
         try {
             // Check if prediction exists and belongs to user using Eloquent
-            $prediction = Prediction::where('prediction_id', $predictionId)
+            $prediction = Prediction::where('prediction_id', $id)
                                   ->where('user_id', $userId)
                                   ->first();
             
@@ -323,10 +314,11 @@ class PredictionController extends Controller
                     }
                     $this->jsonError(trim($errorMessage));
                 } else {
-                    $this->withModelErrors($prediction);
+                    return back()->withInput()->withErrors($errors);
+                    //$this->withModelErrors($prediction);
                     
                     // Re-render the edit form with errors
-                    return $this->responseFormatter->redirect('predictions/edit?id=' . $predictionId);
+                    //return $this->responseFormatter->redirect(route('predictions.edit', ['id' => $predictionId]));
                 }
             }
         } catch (Exception $e) {
