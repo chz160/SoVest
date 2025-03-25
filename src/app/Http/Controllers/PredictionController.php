@@ -53,7 +53,7 @@ class PredictionController extends Controller
                 'predictions' => $formattedPredictions,
                 'pageTitle' => 'My Predictions'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             error_log("Error retrieving predictions: " . $e->getMessage());
             return view('my_predictions', [
                 'predictions' => [],
@@ -66,7 +66,7 @@ class PredictionController extends Controller
     {
         try {
             // Get all active stocks for the dropdown using the injected service
-            $stocks = $this->stockService->getStocks(true);
+            //$stocks = $this->stockService->getStocks(true);
             
             // Check for stock parameters in the URL
             $stockId = $request->query('stock_id');
@@ -92,15 +92,16 @@ class PredictionController extends Controller
             
             // Render the create prediction form
             return view('predictions/create', [
-                'stocks' => $stocks,
+                //'stocks' => $stocks,
                 'isEditing' => false,
                 'prediction' => $prediction,
                 'pageTitle' => 'Create Prediction',
                 'hasPreselectedStock' => ($stockId && $symbol && $companyName)
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             error_log("Error loading stock data: " . $e->getMessage());
-            redirect('home');
+            $this->withError("Error loading stock data: " . $e->getMessage());
+            return $this->responseFormatter->redirect('home');
         }
     }
 
@@ -108,7 +109,7 @@ class PredictionController extends Controller
     {
         $user = Auth::user();
         $userId = Auth::id();
-        
+
         try {
             // Create a new Prediction model instance
             $prediction = new Prediction([
@@ -136,11 +137,12 @@ class PredictionController extends Controller
                         '/predictions');
                 } else {
                     $this->withSuccess("Prediction created successfully");
-                    $request->redirect('/predictions');
+                    return $this->responseFormatter->redirect('/predictions');
                 }
             } else {
                 // Get validation errors
                 $errors = $prediction->getErrors();
+                //error_log(''. $errors);
                 
                 // Determine if this is an API request or a form submission
                 if ($this->isApiRequest()) {
@@ -152,26 +154,28 @@ class PredictionController extends Controller
                     }
                     $this->jsonError(trim($errorMessage));
                 } else {
-                    $this->withModelErrors($prediction);
+                    return back()->withInput()->withErrors($errors);
+                    // $this->withModelErrors($prediction);
                     
-                    // Get stocks using the injected service for the form
-                    $stocks = $this->stockService->getStocks(true);
+                    // // Get stocks using the injected service for the form
+                    // $stocks = $this->stockService->getStocks(true);
                     
-                    // Re-render the form with errors
-                    return view('predictions/create', [
-                        'stocks' => $stocks,
-                        'isEditing' => false,
-                        'prediction' => $_POST,
-                        'pageTitle' => 'Create Prediction'
-                    ]);
+                    // // Re-render the form with errors
+                    // return view('predictions/create', [
+                    //     'stocks' => $stocks,
+                    //     'isEditing' => false,
+                    //     'prediction' => $_POST,
+                    //     'pageTitle' => 'Create Prediction'
+                    // ]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($this->isApiRequest()) {
                 $this->jsonError("Error creating prediction: " . $e->getMessage());
             } else {
                 $this->withError("Error creating prediction: " . $e->getMessage());
-                $request->redirect('predictions/create');
+                //return $this->responseFormatter->redirect('predictions/create');
+                return redirect().back()->withInput()->withErrors($errors);
             }
         }
     }
@@ -190,8 +194,7 @@ class PredictionController extends Controller
         
         if (!$predictionId) {
             $this->withError("Missing prediction ID");
-            $request->redirect('/predictions');
-            return;
+            return $this->responseFormatter->redirect('/predictions');
         }
         
         try {
@@ -203,15 +206,13 @@ class PredictionController extends Controller
             
             if (!$predictionModel) {
                 $this->withError("Prediction not found or you don't have permission to edit it");
-                $request->redirect('/predictions');
-                return;
+                return $this->responseFormatter->redirect('/predictions');
             }
             
             // Check if prediction is still active
             if (!$predictionModel->is_active) {
                 $this->withError("Cannot edit inactive predictions");
-                $request->redirect('/predictions');
-                return;
+                return $this->responseFormatter->redirect('/predictions');
             }
             
             // Convert to array format to maintain compatibility with the view
@@ -230,9 +231,9 @@ class PredictionController extends Controller
                 'prediction' => $prediction,
                 'pageTitle' => 'Edit Prediction'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->withError("Error loading prediction: " . $e->getMessage());
-            $request->redirect('/predictions');
+            return $this->responseFormatter->redirect('/predictions');
         }
     }
     
@@ -253,7 +254,7 @@ class PredictionController extends Controller
                 $this->jsonError("Missing prediction ID");
             } else {
                 $this->withError("Missing prediction ID");
-                $request->redirect('/predictions');
+                return $this->responseFormatter->redirect('/predictions');
             }
             return;
         }
@@ -269,7 +270,7 @@ class PredictionController extends Controller
                     $this->jsonError("Prediction not found or you don't have permission to edit it");
                 } else {
                     $this->withError("Prediction not found or you don't have permission to edit it");
-                    $request->redirect('/predictions');
+                    return $this->responseFormatter->redirect('/predictions');
                 }
                 return;
             }
@@ -280,7 +281,7 @@ class PredictionController extends Controller
                     $this->jsonError("Cannot edit inactive predictions");
                 } else {
                     $this->withError("Cannot edit inactive predictions");
-                    $request->redirect('/predictions');
+                    return $this->responseFormatter->redirect('/predictions');
                 }
                 return;
             }
@@ -307,7 +308,7 @@ class PredictionController extends Controller
                     $this->jsonSuccess("Prediction updated successfully", [], '/predictions');
                 } else {
                     $this->withSuccess("Prediction updated successfully");
-                    $request->redirect('/predictions');
+                    return $this->responseFormatter->redirect('/predictions');
                 }
             } else {
                 // Get validation errors
@@ -325,15 +326,15 @@ class PredictionController extends Controller
                     $this->withModelErrors($prediction);
                     
                     // Re-render the edit form with errors
-                    $request->redirect('predictions/edit?id=' . $predictionId);
+                    return $this->responseFormatter->redirect('predictions/edit?id=' . $predictionId);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($this->isApiRequest()) {
                 $this->jsonError("Error updating prediction: " . $e->getMessage());
             } else {
                 $this->withError("Error updating prediction: " . $e->getMessage());
-                $request->redirect('/predictions');
+                return $this->responseFormatter->redirect('/predictions');
             }
         }
     }
@@ -354,7 +355,7 @@ class PredictionController extends Controller
                 $this->jsonError("Missing prediction ID");
             } else {
                 $this->withError("Missing prediction ID");
-                $request->redirect('/predictions');
+                return $this->responseFormatter->redirect('/predictions');
             }
             return;
         }
@@ -370,7 +371,7 @@ class PredictionController extends Controller
                     $this->jsonError("Prediction not found or you don't have permission to delete it");
                 } else {
                     $this->withError("Prediction not found or you don't have permission to delete it");
-                    $request->redirect('/predictions');
+                    return $this->responseFormatter->redirect('/predictions');
                 }
                 return;
             }
@@ -382,14 +383,14 @@ class PredictionController extends Controller
                 $this->jsonSuccess("Prediction deleted successfully");
             } else {
                 $this->withSuccess("Prediction deleted successfully");
-                $request->redirect('/predictions');
+                return $this->responseFormatter->redirect('/predictions');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($this->isApiRequest()) {
                 $this->jsonError("Error deleting prediction: " . $e->getMessage());
             } else {
                 $this->withError("Error deleting prediction: " . $e->getMessage());
-                $request->redirect('/predictions');
+                return $this->responseFormatter->redirect('/predictions');
             }
         }
     }
@@ -404,7 +405,7 @@ class PredictionController extends Controller
         
         if (!$predictionId) {
             $this->withError("Missing prediction ID");
-            $request->redirect('/predictions/trending');
+            return $this->responseFormatter->redirect('/predictions/trending');
             return;
         }
         
@@ -416,7 +417,7 @@ class PredictionController extends Controller
             
             if (!$prediction) {
                 $this->withError("Prediction not found");
-                $request->redirect('/predictions/trending');
+                return $this->responseFormatter->redirect('/predictions/trending');
                 return;
             }
             
@@ -434,9 +435,9 @@ class PredictionController extends Controller
                 'prediction' => $predictionData,
                 'pageTitle' => $prediction->stock->symbol . ' ' . $prediction->prediction_type . ' Prediction'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->withError("Error retrieving prediction: " . $e->getMessage());
-            $request->redirect('/predictions/trending');
+            return $this->responseFormatter->redirect('/predictions/trending');
         }
     }
     
@@ -501,7 +502,7 @@ class PredictionController extends Controller
                 'trending_predictions' => $trending_predictions,
                 'pageTitle' => 'Trending Predictions'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fallback to dummy data if an error occurs
             $trending_predictions = [
                 ['username' => 'Investor123', 'symbol' => 'AAPL', 'prediction' => 'Bullish', 'votes' => 120, 'accuracy' => 92],
@@ -574,7 +575,7 @@ class PredictionController extends Controller
                 $vote->save();
                 $this->jsonSuccess("Vote recorded successfully");
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->jsonError("Error processing vote: " . $e->getMessage());
         }
     }
@@ -613,7 +614,7 @@ class PredictionController extends Controller
                 $this->jsonError('User not found');
                 return;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->jsonError('Database connection failed: ' . $e->getMessage());
             return;
         }

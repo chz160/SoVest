@@ -57,7 +57,7 @@ class Prediction extends Model {
             'user_id' => ['required', 'exists'],
             'stock_id' => ['required', 'exists'],
             'prediction_type' => ['required', 'in:Bullish,Bearish'],
-            'target_price' => ['numeric', 'nullable'],
+            'target_price' => ['numeric'],
             'end_date' => ['required', 'date', 'futureDate'],
             'reasoning' => ['required']
         ];
@@ -80,7 +80,7 @@ class Prediction extends Model {
             'target_price.numeric' => 'Target price must be a numeric value',
             'end_date.required' => 'End date is required',
             'end_date.date' => 'End date must be a valid date',
-            'end_date.futureDate' => 'End date must be a future date',
+            'end_date.futureDate' => 'End date must be a business day (Monday-Friday) within the next 5 business days',
             'reasoning.required' => 'Reasoning for your prediction is required'
         ];
     }
@@ -126,7 +126,67 @@ class Prediction extends Model {
     }
 
     /**
-     * Validate that a date is in the future
+     * Check if a date is a business day (Monday to Friday)
+     * 
+     * @param \DateTime $date The date to check
+     * @return boolean Whether the date is a business day
+     */
+    protected function isBusinessDay(\DateTime $date)
+    {
+        $dayOfWeek = (int)$date->format('N'); // 1 (Monday) to 7 (Sunday)
+        return $dayOfWeek >= 1 && $dayOfWeek <= 5; // Monday to Friday
+    }
+
+    /**
+     * Get the next business day from a given date
+     * 
+     * @param \DateTime $date The starting date
+     * @return \DateTime The next business day
+     */
+    protected function getNextBusinessDay(\DateTime $date)
+    {
+        $nextDay = clone $date;
+        $nextDay->modify('+1 day');
+        
+        // Keep adding days until we find a business day
+        while (!$this->isBusinessDay($nextDay)) {
+            $nextDay->modify('+1 day');
+        }
+        
+        return $nextDay;
+    }
+
+    /**
+     * Calculate a date that is N business days from a given date
+     * 
+     * @param \DateTime $startDate The starting date
+     * @param int $businessDays Number of business days to add
+     * @return \DateTime The resulting date
+     */
+    protected function addBusinessDays(\DateTime $startDate, int $businessDays)
+    {
+        $result = clone $startDate;
+        
+        // If the start date is not a business day, start from the next business day
+        if (!$this->isBusinessDay($result)) {
+            $result = $this->getNextBusinessDay($result);
+            // We already moved to the first business day, so subtract 1 from the total
+            $businessDays--;
+        }
+        
+        // Add the remaining business days
+        while ($businessDays > 0) {
+            $result->modify('+1 day');
+            if ($this->isBusinessDay($result)) {
+                $businessDays--;
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Validate that a date is a business day within the acceptable range
      * 
      * @param string $attribute Attribute name being validated
      * @param mixed $value Date value to validate
@@ -149,10 +209,36 @@ class Prediction extends Model {
         // Convert to a DateTime object
         $dateObj = new \DateTime($value);
         $now = new \DateTime();
-
-        // Check if the date is in the future
-        if ($dateObj <= $now) {
-            $this->addError($attribute, $this->getMessage($attribute, 'futureDate', "The $attribute must be a date in the future."));
+        
+        // Set today's time to midnight for accurate comparison
+        $today = new \DateTime($now->format('Y-m-d'));
+        
+        // Calculate the minimum allowable date (today if it's a business day, or next business day)
+        $minDate = $this->isBusinessDay($today) ? clone $today : $this->getNextBusinessDay($today);
+        
+        // Calculate the maximum allowable date (5 business days from min date)
+        $maxDate = $this->addBusinessDays($minDate, 5);
+        
+        // Check if the date is a business day
+        if (!$this->isBusinessDay($dateObj)) {
+            $this->addError($attribute, $this->getMessage($attribute, 'futureDate', 
+                "The $attribute must be a business day (Monday-Friday)."));
+            return false;
+        }
+        
+        // Check if the date is at least the minimum date
+        if ($dateObj < $minDate) {
+            $this->addError($attribute, $this->getMessage($attribute, 'futureDate', 
+                "The $attribute must be today or a future business day."));
+            return false;
+        }
+        
+        // Check if the date is at most the maximum date
+        if ($dateObj > $maxDate) {
+            // Format dates for friendly message
+            $maxDateStr = $maxDate->format('l, F j, Y');
+            $this->addError($attribute, $this->getMessage($attribute, 'futureDate', 
+                "The $attribute must be within 5 business days from now (no later than $maxDateStr)."));
             return false;
         }
         
