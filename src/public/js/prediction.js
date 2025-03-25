@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const predictionTypeSelect = document.getElementById('prediction_type');
     const targetPriceInput = document.getElementById('target_price');
     const endDateInput = document.getElementById('end_date');
-    const dateHelpText = document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text');
+    //const dateHelpText = document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text');
     const endDateFeedback = document.getElementById('end-date-feedback');
     const reasoningTextarea = document.getElementById('reasoning');
     const submitButton = document.querySelector('button[type="submit"]');
@@ -23,11 +23,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const minDate = isBusinessDay(today) ? today : getNextBusinessDay(today);
     const maxDate = addBusinessDays(minDate, 5);
 
-    // Set min/max attributes on the date input
-    endDateInput.min = formatDateForInput(minDate);
-    endDateInput.max = formatDateForInput(maxDate);
+    if (endDateInput != null) {
+        // Set min/max attributes on the date input
+        endDateInput.min = formatDateForInput(minDate);
+        endDateInput.max = formatDateForInput(maxDate);
+    }
 
-    // Update the form text to inform users of business day constraints
+    
 
     // Enable tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -35,7 +37,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    if (dateHelpText) {
+    // Update the form text to inform users of business day constraints
+    if (
+        document.querySelector('#end_date') != null &&
+        document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text').length() > 0) {
+        const dateHelpText = document.querySelector('#end_date').closest('.mb-4').querySelector('.form-text');
         dateHelpText.innerHTML = `Select a business day (Monday-Friday) between <strong>${formatDateForDisplay(minDate)}</strong> and <strong>${formatDateForDisplay(maxDate)}</strong>. Predictions must be within 5 business days.`;
     }
 
