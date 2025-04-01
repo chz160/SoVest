@@ -40,11 +40,11 @@ Route::controller(PredictionController::class)->group(function () {
 Route::prefix('api')->middleware('api')->name('api.')->group(function () {
     Route::match(['GET', 'POST'], '/predictions', [PredictionController::class, 'apiHandler'])->name('predictions');
     Route::post('/predictions/create', [PredictionController::class, 'store'])->name('predictions.create');
-    Route::post('/predictions/update', [PredictionController::class, 'update'])->name('predictions.update');
-    Route::post('/predictions/delete', [PredictionController::class, 'delete'])->name('predictions.delete');
+    Route::post('/predictions/update', [PredictionController::class, 'update'])->name('predictions.update')->middleware('prediction.owner');
+    Route::delete('/predictions/delete/{id}', [PredictionController::class, 'delete'])->name('predictions.delete');
     Route::get('/predictions/get', [PredictionController::class, 'apiGetPrediction'])->name('predictions.get');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
-    Route::get('/search_stocks', [SearchController::class, 'searchStocks'])->name('search_stocks');
+    Route::get('/search_stocks', [SearchController::class, 'searchStocks'])->name('search.stocks');
     Route::get('/stocks', [SearchController::class, 'stocks'])->name('stocks');
     Route::get('/stocks/{symbol}', [SearchController::class, 'getStock'])->name('stocks.get')
         ->where('symbol', '[A-Z]{1,5}');

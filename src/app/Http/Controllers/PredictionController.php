@@ -334,15 +334,11 @@ class PredictionController extends Controller
     /**
      * Handle prediction deletion
      */
-    public function delete(Request $request)
+    public function delete(Request $request, int $id)
     {
-        $user = Auth::user();
         $userId = Auth::id();
         
-        // Get the prediction ID from the request
-        $predictionId = $request->input('prediction_id');
-        
-        if (!$predictionId) {
+        if (!$id) {
             if ($this->isApiRequest()) {
                 $this->jsonError("Missing prediction ID");
             } else {
@@ -354,7 +350,7 @@ class PredictionController extends Controller
         
         try {
             // Check if prediction exists and belongs to user using Eloquent
-            $prediction = Prediction::where('prediction_id', $predictionId)
+            $prediction = Prediction::where('prediction_id', $id)
                                   ->where('user_id', $userId)
                                   ->first();
             

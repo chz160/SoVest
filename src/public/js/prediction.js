@@ -677,15 +677,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', function () {
                 if (predictionToDelete) {
-                    // Create form data
-                    const formData = new FormData();
-                    formData.append('action', 'delete');
-                    formData.append('prediction_id', predictionToDelete);
-
+                    const url = `${apiEndpoints.deletePrediction}`.replace("/0", `/${predictionToDelete}`);
                     // Send delete request
-                    fetch(apiEndpoints.deletePrediction, {
-                        method: 'POST',
-                        body: formData
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            //'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
                     })
                         .then(response => response.json())
                         .then(data => {

@@ -318,32 +318,6 @@ HTML;
                 });
             });
         });
-
-        // Handle delete confirmation
-        document.getElementById('confirmDelete')?.addEventListener('click', function() {
-            const predictionId = document.querySelector('.delete-prediction').getAttribute('data-id');
-            
-            fetch('{{ route('prediction.delete') }}', {
-                method: 'POST',
-                body: JSON.stringify({ id: predictionId }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '{{ route('prediction.index') }}';
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error deleting prediction:', error);
-                alert('An error occurred while deleting the prediction');
-            });
-        });
     });
     </script>
 @endsection
