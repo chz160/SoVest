@@ -44,7 +44,7 @@
 
 </head>
 
-<body data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
+<body data-authenticated="{{ auth()->check() ? 'true' : 'false' }}" data-user-id="{{ auth()->id() ?? '' }}">
     <div class="container py-3 mobile-safe-area">
 
         <header>

@@ -104,11 +104,15 @@ class CommentController extends Controller
                 ], 404);
             }
 
-            // Check if user owns the comment
-            if ($comment->user_id !== Auth::id()) {
+            // Allow delete if user is comment author OR prediction owner
+            $prediction = Prediction::find($comment->prediction_id);
+            $isCommentAuthor = $comment->user_id === Auth::id();
+            $isPredictionOwner = $prediction && $prediction->user_id === Auth::id();
+
+            if (!$isCommentAuthor && !$isPredictionOwner) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You can only delete your own comments'
+                    'message' => 'You do not have permission to delete this comment'
                 ], 403);
             }
 
@@ -156,6 +160,7 @@ class CommentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $formattedComments,
+                'prediction_owner_id' => $prediction->user_id,
                 'pagination' => [
                     'current_page' => $comments->currentPage(),
                     'last_page' => $comments->lastPage(),

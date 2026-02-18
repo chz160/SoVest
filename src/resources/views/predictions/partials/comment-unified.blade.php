@@ -57,13 +57,16 @@
         @if(!$isReply && Auth::check())
             <button class="modal-reply-btn" data-comment-id="{{ $comment->comment_id ?? $comment->id }}">Reply</button>
         @endif
+        @if(Auth::check() && (Auth::id() == $comment->user_id || (isset($predictionOwnerId) && Auth::id() == $predictionOwnerId)))
+            <button class="modal-delete-btn" data-comment-id="{{ $comment->comment_id ?? $comment->id }}" onclick="confirmDeleteComment({{ $comment->comment_id ?? $comment->id }})">Delete</button>
+        @endif
     </div>
 
     {{-- Render replies if present --}}
     @if(isset($comment->replies) && $comment->replies->count() > 0 && $depth < $maxDepth)
         <div class="modal-replies">
             @foreach($comment->replies as $reply)
-                @include('predictions.partials.comment-unified', ['comment' => $reply, 'depth' => $depth + 1])
+                @include('predictions.partials.comment-unified', ['comment' => $reply, 'depth' => $depth + 1, 'predictionOwnerId' => $predictionOwnerId ?? null])
             @endforeach
             @if($comment->replies->count() > 3 && $depth === 0)
                 <div class="modal-continue-thread">Continue thread &rarr;</div>

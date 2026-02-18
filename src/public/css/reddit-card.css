@@ -1115,6 +1115,24 @@ body.dark-mode .prediction-modal-backdrop {
     color: var(--reddit-info);
 }
 
+.modal-delete-btn {
+    background: none;
+    border: none;
+    color: var(--reddit-text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color 0.15s ease;
+    font-family: inherit;
+}
+
+.modal-delete-btn:hover {
+    background: none;
+    color: var(--reddit-accent);
+}
+
 /* Nested Replies with Thread Lines */
 .modal-replies {
     margin-top: 0.5rem;

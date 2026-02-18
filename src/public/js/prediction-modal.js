@@ -28,9 +28,11 @@ class PredictionModal {
         this.closeBtn = document.getElementById('predictionModalClose');
         this.shareToast = document.getElementById('shareToast');
 
-        // Get CSRF token and auth status
+        // Get CSRF token, auth status, and current user ID
         this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         this.isAuthenticated = document.body.dataset.authenticated === 'true';
+        this.currentUserId = parseInt(document.body.dataset.userId) || null;
+        this.predictionOwnerId = null;
 
         // Bind event listeners
         this.bindEvents();
@@ -191,6 +193,7 @@ class PredictionModal {
     }
 
     renderContent(data) {
+        this.predictionOwnerId = data.user?.id || null;
         const isBullish = data.prediction_type.toLowerCase() === 'bullish';
         const profilePicture = data.user.profile_picture
             ? `/images/profile_pictures/${data.user.profile_picture}`
@@ -404,6 +407,11 @@ class PredictionModal {
             const response = await fetch(`/predictions/${predictionId}/comments`);
             const result = await response.json();
 
+            // Update prediction owner ID from comments response
+            if (result.prediction_owner_id) {
+                this.predictionOwnerId = result.prediction_owner_id;
+            }
+
             const list = document.getElementById('modalCommentsList');
             if (!list) return;
 
@@ -456,6 +464,12 @@ class PredictionModal {
                 <div class="modal-comment-actions">
                     ${!isReply && this.isAuthenticated ? `
                         <button class="modal-reply-btn" data-comment-id="${comment.comment_id}">Reply</button>
+                    ` : ''}
+                    ${this.isAuthenticated && this.currentUserId && (
+                        comment.user?.id === this.currentUserId ||
+                        this.predictionOwnerId === this.currentUserId
+                    ) ? `
+                        <button class="modal-delete-btn" data-comment-id="${comment.comment_id}">Delete</button>
                     ` : ''}
                 </div>
         `;
@@ -521,13 +535,19 @@ class PredictionModal {
             }
         });
 
-        // Reply buttons (delegated)
+        // Reply and delete buttons (delegated)
         document.getElementById('modalCommentsList')?.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-reply-btn')) {
                 const input = document.getElementById('modalCommentInput');
                 if (input) {
                     input.focus();
                     input.placeholder = 'Add a reply...';
+                }
+            }
+            if (e.target.classList.contains('modal-delete-btn')) {
+                const commentId = e.target.dataset.commentId;
+                if (commentId && confirm('Are you sure you want to delete this comment? Any replies will also be deleted.')) {
+                    this.deleteComment(commentId, predictionId);
                 }
             }
         });
@@ -650,6 +670,38 @@ class PredictionModal {
             console.error('Comment error:', error);
         } finally {
             if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    async deleteComment(commentId, predictionId) {
+        try {
+            const response = await fetch(`/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Reload comments to reflect deletion
+                await this.loadComments(predictionId);
+
+                // Update comment count from fresh data
+                const countResponse = await fetch(`/predictions/${predictionId}/comments`);
+                const countResult = await countResponse.json();
+                const countEl = document.getElementById('modalCommentsCount');
+                if (countEl && countResult.pagination) {
+                    countEl.textContent = `(${countResult.pagination.total})`;
+                }
+            } else {
+                alert(result.message || 'Failed to delete comment.');
+            }
+        } catch (error) {
+            console.error('Delete comment error:', error);
+            alert('Failed to delete comment. Please try again.');
         }
     }
 

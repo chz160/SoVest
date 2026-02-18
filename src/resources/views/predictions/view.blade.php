@@ -275,7 +275,7 @@
                         <div class="modal-comments-list" id="commentsList">
                             @if(isset($comments) && $comments->count() > 0)
                                 @foreach($comments as $comment)
-                                    @include('predictions.partials.comment-unified', ['comment' => $comment, 'depth' => 0])
+                                    @include('predictions.partials.comment-unified', ['comment' => $comment, 'depth' => 0, 'predictionOwnerId' => $prediction['user_id']])
                                 @endforeach
                             @else
                                 <div class="modal-no-comments">
@@ -533,6 +533,36 @@ document.getElementById('confirmDeleteBtn')?.addEventListener('click', async fun
         alert('An error occurred while deleting');
     }
 });
+
+// Comment deletion
+function confirmDeleteComment(commentId) {
+    if (confirm('Are you sure you want to delete this comment? Any replies will also be deleted.')) {
+        deleteComment(commentId);
+    }
+}
+
+async function deleteComment(commentId) {
+    try {
+        const response = await fetch(`/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                'Accept': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert(result.message || 'Failed to delete comment.');
+        }
+    } catch (error) {
+        console.error('Delete comment error:', error);
+        alert('Failed to delete comment. Please try again.');
+    }
+}
 
 // Share functionality
 function sharePrediction(predictionId, symbol) {
