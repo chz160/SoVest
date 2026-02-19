@@ -94,6 +94,13 @@ class PredictionScoringService implements PredictionScoringServiceInterface {
 
             $results['total'] = count($predictions);
 
+            // Mark all fetched predictions inactive upfront so they are never
+            // re-queued on the next run, regardless of whether evaluation succeeds.
+            if ($predictions->isNotEmpty()) {
+                Prediction::whereIn('prediction_id', $predictions->pluck('prediction_id'))
+                    ->update(['is_active' => 0]);
+            }
+
             foreach ($predictions as $prediction) {
                 try {
                     $this->evaluatePrediction([
@@ -114,6 +121,52 @@ class PredictionScoringService implements PredictionScoringServiceInterface {
             }
         } catch (\Exception $e) {
             error_log("Error fetching predictions: " . $e->getMessage());
+            throw $e;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Evaluate all expired predictions that have never been scored,
+     * regardless of their is_active status (for backfill runs)
+     */
+    public function evaluateHistoricalPredictions() {
+        $results = [
+            'total' => 0,
+            'evaluated' => 0,
+            'errors' => 0
+        ];
+
+        try {
+            // Fetch every expired prediction with no accuracy yet, regardless of is_active
+            $predictions = Prediction::where('end_date', '<', Carbon::today())
+                ->whereNull('accuracy')
+                ->with(['stock', 'user'])
+                ->get();
+
+            $results['total'] = count($predictions);
+
+            foreach ($predictions as $prediction) {
+                try {
+                    $this->evaluatePrediction([
+                        'prediction_id' => $prediction->prediction_id,
+                        'user_id' => $prediction->user_id,
+                        'symbol' => $prediction->stock->symbol,
+                        'prediction_type' => $prediction->prediction_type,
+                        'target_price' => $prediction->target_price,
+                        'prediction_date' => $prediction->prediction_date,
+                        'end_date' => $prediction->end_date,
+                        'thesis_rating' => $prediction->thesis_rating ?? 3,
+                    ]);
+                    $results['evaluated']++;
+                } catch (\Exception $e) {
+                    $results['errors']++;
+                    error_log("Error evaluating historical prediction ID {$prediction->prediction_id}: " . $e->getMessage());
+                }
+            }
+        } catch (\Exception $e) {
+            error_log("Error fetching historical predictions: " . $e->getMessage());
             throw $e;
         }
 
@@ -545,10 +598,10 @@ class PredictionScoringService implements PredictionScoringServiceInterface {
                 return null;
             }
 
-            // Get the price record closest to the date (within 7 days)
+            // Get the price record closest to the date (within 14 days to handle weekends/holidays)
             $price = StockPrice::where('stock_id', $stock->stock_id)
                 ->where('price_date', '<=', $date)
-                ->where('price_date', '>=', date('Y-m-d', strtotime($date . ' -7 days')))
+                ->where('price_date', '>=', date('Y-m-d', strtotime($date . ' -14 days')))
                 ->orderBy('price_date', 'desc')
                 ->first();
 
@@ -557,25 +610,26 @@ class PredictionScoringService implements PredictionScoringServiceInterface {
                 return (float)$price->close_price;
             }
 
-            // If no historical price found within 7 days, fetch from API
-            error_log("No historical price found for $symbol near $date, fetching from API...");
+            // If no historical price found, fetch real historical daily data from API
+            error_log("No historical price found for $symbol near $date, fetching historical data from API...");
 
-            $fetchResult = $this->stockService->fetchAndStoreStockData($symbol);
+            $daysBack = max(30, (int) ceil((time() - strtotime($date)) / 86400) + 14);
+            $fetchResult = $this->stockService->fetchHistoricalPrices($symbol, $daysBack);
 
             if ($fetchResult) {
-                error_log("Successfully fetched and stored price for $symbol from API");
-
                 $storedPrice = StockPrice::where('stock_id', $stock->stock_id)
+                    ->where('price_date', '<=', $date)
+                    ->where('price_date', '>=', date('Y-m-d', strtotime($date . ' -14 days')))
                     ->orderBy('price_date', 'desc')
                     ->first();
 
                 if ($storedPrice) {
-                    error_log("Using stored price from {$storedPrice->price_date}: {$storedPrice->close_price}");
+                    error_log("Using historical price from {$storedPrice->price_date}: {$storedPrice->close_price}");
                     return (float)$storedPrice->close_price;
                 }
             }
 
-            error_log("Failed to fetch price for $symbol from API");
+            error_log("Failed to fetch historical price for $symbol near $date");
             return null;
         } catch (\Exception $e) {
             error_log("Error getting stock price at date: " . $e->getMessage());

@@ -12,10 +12,18 @@ interface PredictionScoringServiceInterface
 {
     /**
      * Evaluate all active predictions that have reached their end date
-     * 
+     *
      * @return array Results of evaluations
      */
     public function evaluateActivePredictions();
+
+    /**
+     * Evaluate all expired predictions that have never been scored,
+     * regardless of their is_active status (for backfill runs)
+     *
+     * @return array Results of evaluations
+     */
+    public function evaluateHistoricalPredictions();
 
     /**
      * Evaluate a single prediction

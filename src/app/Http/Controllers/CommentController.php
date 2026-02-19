@@ -153,8 +153,9 @@ class CommentController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(20);
 
-            $formattedComments = $comments->map(function ($comment) {
-                return $this->formatComment($comment);
+            $predictionOwnerId = $prediction->user_id;
+            $formattedComments = $comments->map(function ($comment) use ($predictionOwnerId) {
+                return $this->formatComment($comment, $predictionOwnerId);
             });
 
             return response()->json([
@@ -180,8 +181,14 @@ class CommentController extends Controller
     /**
      * Format a comment for JSON response.
      */
-    private function formatComment($comment)
+    private function formatComment($comment, int $predictionOwnerId = 0)
     {
+        $currentUserId = Auth::id();
+        $canDelete = $currentUserId && (
+            $comment->user_id == $currentUserId ||
+            $currentUserId == $predictionOwnerId
+        );
+
         $formatted = [
             'comment_id' => $comment->comment_id,
             'content' => $comment->content,
@@ -193,13 +200,14 @@ class CommentController extends Controller
             ],
             'is_reply' => $comment->isReply(),
             'parent_comment_id' => $comment->parent_comment_id,
+            'can_delete' => $canDelete,
             'replies' => [],
         ];
 
         // Format replies recursively
         if ($comment->replies && $comment->replies->count() > 0) {
-            $formatted['replies'] = $comment->replies->map(function ($reply) {
-                return $this->formatComment($reply);
+            $formatted['replies'] = $comment->replies->map(function ($reply) use ($predictionOwnerId) {
+                return $this->formatComment($reply, $predictionOwnerId);
             })->toArray();
         }
 

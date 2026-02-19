@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Tasks\UpdateStockListings;
 use App\Tasks\UpdateStockPrices;
 use App\Tasks\EvaluatePredictions;
+use App\Tasks\EvaluateHistoricalPredictions;
 
 Artisan::command('inspire', function () {
     /** @var ClosureCommand $this */
@@ -64,6 +65,22 @@ Artisan::command('predictions:evaluate', function () {
         Log::error('Failed to evaluate predictions: ' . $e->getMessage());
     }
 })->purpose('Evaluate predictions manually');
+
+// One-time backfill: evaluate all historical predictions that were never scored
+Artisan::command('predictions:evaluate-historical', function () {
+    /** @var ClosureCommand $this */
+    $this->info('Starting historical prediction evaluation...');
+
+    try {
+        $task = app()->make(EvaluateHistoricalPredictions::class);
+        $task->__invoke();
+
+        $this->info('Historical predictions evaluated successfully.');
+    } catch (\Exception $e) {
+        $this->error('Failed to evaluate historical predictions: ' . $e->getMessage());
+        Log::error('Failed to evaluate historical predictions: ' . $e->getMessage());
+    }
+})->purpose('Backfill evaluation for all expired predictions that were never scored');
 
 // Schedule the UpdateStockListings task to run weekly
 Schedule::call(function () {

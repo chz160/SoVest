@@ -42,6 +42,33 @@
 </div>
 
 <style>
+/* Essential modal hiding styles - must be inline to work on all pages */
+.prediction-detail-modal {
+    display: none;
+    opacity: 0;
+}
+.prediction-detail-modal.active {
+    display: flex;
+}
+.prediction-detail-modal.visible {
+    opacity: 1;
+}
+
+/* Share toast - hidden by default */
+.share-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10000;
+}
+.share-toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
 /* Spinner animation for loading state */
 @keyframes spin {
     from { transform: rotate(0deg); }

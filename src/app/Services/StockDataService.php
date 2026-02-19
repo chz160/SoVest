@@ -445,7 +445,7 @@ class StockDataService implements StockDataServiceInterface
      * Fetch and store historical price data from Alpha Vantage TIME_SERIES_DAILY
      *
      * @param string $symbol Stock symbol
-     * @param int $days Number of days of history to fetch (max ~100 with compact output)
+     * @param int $days Number of days of history to fetch (uses compact output up to ~140 days, full output beyond that)
      * @return bool Success status
      */
     public function fetchHistoricalPrices($symbol, $days = 30)
@@ -465,8 +465,9 @@ class StockDataService implements StockDataServiceInterface
             $apiKey = Config::get("api_config.ALPHA_VANTAGE_API_KEY");
             $baseUrl = Config::get("api_config.ALPHA_VANTAGE_BASE_URL");
 
-            // Use TIME_SERIES_DAILY with compact output (last 100 data points)
-            $url = $baseUrl . "?function=TIME_SERIES_DAILY&symbol=$symbol&outputsize=compact&apikey=$apiKey";
+            // Use full output if we need more than ~100 trading days (~140 calendar days)
+            $outputSize = $days > 140 ? 'full' : 'compact';
+            $url = $baseUrl . "?function=TIME_SERIES_DAILY&symbol=$symbol&outputsize=$outputSize&apikey=$apiKey";
 
             writeApiLog("Fetching historical prices for $symbol");
 

@@ -459,10 +459,7 @@ class PredictionModal {
                     ${!isReply && this.isAuthenticated ? `
                         <button class="modal-reply-btn" data-comment-id="${comment.comment_id}">Reply</button>
                     ` : ''}
-                    ${this.isAuthenticated && this.currentUserId && (
-                        comment.user?.id === this.currentUserId ||
-                        this.predictionOwnerId === this.currentUserId
-                    ) ? `
+                    ${comment.can_delete ? `
                         <button class="modal-delete-btn" data-comment-id="${comment.comment_id}">Delete</button>
                     ` : ''}
                 </div>
